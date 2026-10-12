@@ -1,0 +1,18 @@
+# Ordered planar waypoints in the configured global frame. Header stamps are
+# replaced with the ROS time at dispatch. Empty behavior trees are used by Nav2.
+string label
+geometry_msgs/PoseStamped[] waypoints
+bool record
+---
+string run_id
+string artifact_directory
+# succeeded, canceled, failed, or cancellation_unconfirmed
+string outcome
+string message
+uint32 completed_waypoints
+---
+string run_id
+# preparing, recording, navigating, canceling, finalizing
+string state
+uint32 current_waypoint
+uint32 completed_waypoints

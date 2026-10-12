@@ -1,0 +1,36 @@
+RobotOps
+Copyright 2026 The RobotOps Authors
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Third-party configuration
+-------------------------
+These navigation configuration files follow upstream example configurations.
+Parameter names, structure and some default values come from those projects;
+RobotOps selects and tunes the values for its robot and worlds.
+
+  ros2_ws/src/robot_navigation/config/navigation.yaml
+  ros2_ws/src/robot_navigation/config/localization.yaml
+  ros2_ws/src/robot_navigation/config/profiles/navfn_rpp.yaml
+  ros2_ws/src/robot_navigation/config/profiles/smac_dwb.yaml
+    Based on Nav2 nav2_bringup/params/nav2_params.yaml. The DWB critic block in
+    smac_dwb.yaml is adapted from that file.
+    Nav2 (navigation2), Apache License 2.0
+    https://github.com/ros-navigation/navigation2
+
+  ros2_ws/src/robot_navigation/config/slam.yaml
+    Parameter names follow SLAM Toolbox config/mapper_params_online_async.yaml.
+    SLAM Toolbox, GNU LGPL 2.1
+    https://github.com/SteveMacenski/slam_toolbox
+
+Dependencies
+------------
+RobotOps builds against, but does not include, ROS 2, Nav2, SLAM Toolbox,
+Gazebo, ros2_control and npm/PyPI packages. Their own licenses apply. The
+robot_navigation slam_runner links SLAM Toolbox (LGPL); review LGPL obligations
+before distributing compiled binaries or container images.
+
+Recorded data
+-------------
+Recorded experiments, MCAP files and derived replay datasets are not part of
+this source release and are not covered by this license.

@@ -1,0 +1,280 @@
+{
+  "$defs": {
+    "EvidenceSlot": {
+      "additionalProperties": false,
+      "properties": {
+        "availability": {
+          "enum": [
+            "UNAVAILABLE",
+            "INCOMPLETE",
+            "UNASSESSED"
+          ],
+          "title": "Availability",
+          "type": "string"
+        },
+        "campaign_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Campaign Id"
+        },
+        "experiment_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Experiment Id"
+        },
+        "files": {
+          "items": {
+            "$ref": "#/$defs/FilePin"
+          },
+          "title": "Files",
+          "type": "array"
+        },
+        "mission_run_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mission Run Id"
+        },
+        "observations": {
+          "$ref": "#/$defs/Observations"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "slot": {
+          "enum": [
+            "W01",
+            "W02",
+            "W03",
+            "W04",
+            "W05",
+            "W06"
+          ],
+          "title": "Slot",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "PLANNED",
+            "NOT_RUN",
+            "ATTEMPTED"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "trial_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Trial Id"
+        }
+      },
+      "required": [
+        "slot",
+        "state",
+        "reason",
+        "campaign_id",
+        "trial_id",
+        "experiment_id",
+        "mission_run_id",
+        "files",
+        "availability",
+        "observations"
+      ],
+      "title": "EvidenceSlot",
+      "type": "object"
+    },
+    "FilePin": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "title": "FilePin",
+      "type": "object"
+    },
+    "Observations": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_ros_s": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duration Ros S"
+        },
+        "final_xy_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Final Xy M"
+        },
+        "final_yaw_rad": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Final Yaw Rad"
+        },
+        "gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Gaps",
+          "type": "array"
+        },
+        "initial_conditions": {
+          "enum": [
+            "UNAVAILABLE",
+            "UNKNOWN",
+            "OBSERVED"
+          ],
+          "title": "Initial Conditions",
+          "type": "string"
+        },
+        "odometry_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Odometry M"
+        },
+        "original_outcome": {
+          "enum": [
+            "UNAVAILABLE",
+            "succeeded",
+            "failed",
+            "canceled",
+            "interrupted"
+          ],
+          "title": "Original Outcome",
+          "type": "string"
+        },
+        "random_seed": {
+          "default": null,
+          "title": "Random Seed",
+          "type": "null"
+        },
+        "recording_coverage": {
+          "enum": [
+            "UNAVAILABLE",
+            "UNKNOWN",
+            "PARTIAL",
+            "COMPLETE"
+          ],
+          "title": "Recording Coverage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "original_outcome",
+        "final_xy_m",
+        "final_yaw_rad",
+        "duration_ros_s",
+        "odometry_m",
+        "recording_coverage",
+        "initial_conditions",
+        "gaps"
+      ],
+      "title": "Observations",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "matrix_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Matrix Sha256",
+      "type": "string"
+    },
+    "qualification": {
+      "const": "UNASSESSED_NO_EXPERIMENT_VERDICT",
+      "title": "Qualification",
+      "type": "string"
+    },
+    "schema_version": {
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "slots": {
+      "items": {
+        "$ref": "#/$defs/EvidenceSlot"
+      },
+      "maxItems": 6,
+      "minItems": 6,
+      "title": "Slots",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "matrix_sha256",
+    "qualification",
+    "slots"
+  ],
+  "title": "EvidenceIndex",
+  "type": "object"
+}

@@ -1,0 +1,18 @@
+# Local trusted owner only. Does not authenticate callers or command navigation.
+uint8 ARM=1
+uint8 BIND_NAV=2
+uint8 STOP=3
+uint8 operation
+string experiment_id
+string trial_id
+string plan_sha256
+string session_id
+uint64 clock_epoch
+# 32 lowercase hex UUIDs, mission on ARM; same mission on subsequent operations.
+string mission_id
+string nav_goal_id
+---
+bool accepted
+string state
+bool recovery_verified
+string reason

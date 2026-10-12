@@ -1,0 +1,222 @@
+{
+  "matrix_schema_version": 1,
+  "matrix_id": "warehouse-navigation-v1-draft",
+  "status": "DESIGN_ONLY_NOT_EXECUTABLE",
+  "created_date": "2026-10-12",
+  "execution_approved": false,
+  "publication_approved": false,
+  "comparison_intent": "MATCHED_SCENARIO_PROFILE_BUNDLES_NOT_ALGORITHM_SUPERIORITY",
+  "scenario": {
+    "id": "warehouse_v1",
+    "qualification": "NOT_CREATED_NOT_QUALIFIED",
+    "world_sha256": null,
+    "map_id": "warehouse_v1",
+    "map_yaml_sha256": null,
+    "map_image_sha256": null,
+    "proposed_geometry": {
+      "wall_centres_rectangle_m": {
+        "x_min": -2.0,
+        "x_max": 10.0,
+        "y_min": -1.5,
+        "y_max": 8.5
+      },
+      "wall_thickness_m": 0.2,
+      "obstacle_height_m": 1.2,
+      "shelf_centres_xy_m": [
+        [
+          2.0,
+          3.5
+        ],
+        [
+          4.0,
+          3.5
+        ],
+        [
+          6.0,
+          3.5
+        ]
+      ],
+      "shelf_size_xy_m": [
+        0.8,
+        4.0
+      ],
+      "clear_aisle_width_m": 1.2,
+      "nominal_cross_aisle_width_m": 2.9
+    },
+    "proposed_map_resolution_m": 0.05,
+    "map_generation": "PROPOSED_ANALYTIC_RASTER_OF_APPROVED_COLLISION_GEOMETRY_NOT_SLAM",
+    "random_seed": null,
+    "seed_status": "NOT_EXPOSED_OR_QUALIFIED_BY_CURRENT_RUNNER"
+  },
+  "profiles": {
+    "navfn_rpp": {
+      "source_path": "ros2_ws/src/robot_navigation/config/profiles/navfn_rpp.yaml",
+      "sha256": "b2773fafd39a85ce43b5ae3f90f015b314b12fdf469a26c5b999bdfac5694feb",
+      "public_source_provenance": "UNKNOWN_PUBLIC_INCLUSION_HELD"
+    },
+    "smac_dwb": {
+      "source_path": "ros2_ws/src/robot_navigation/config/profiles/smac_dwb.yaml",
+      "sha256": "c612b7a0f162854f9ecde5a270ca642a8bf35c3a3618ab411c01d33a2df18ba9",
+      "public_source_provenance": "UNKNOWN_PUBLIC_INCLUSION_HELD"
+    }
+  },
+  "shared_source_sha256": {
+    "ros2_ws/src/robot_navigation/config/navigation.yaml": "730e72a252dfc551a336295c110709cd5b7cd0a630c86fea8001778f94594d39",
+    "ros2_ws/src/robot_navigation/config/localization.yaml": "37fda2bdb0dcc98ad5727d73b820fb11bf6847a016eafc452c2a720173ed466e",
+    "ros2_ws/src/robot_description/config/geometry.yaml": "bd180e8e4b84b30e11f38b452cd248e53c505eee9bbdce117b9441af7f9c997f",
+    "ros2_ws/src/robot_control/config/controllers.yaml": "7ad9b4b972e8552ada36b4c6333dc666f0550c3d5839e0fb45c2feda36dbb9d5",
+    "ros2_ws/src/robot_recorder/config/recording.yaml": "81f10735f9498f7618eabd9a159d4a448a5efb4c14c1c98634229dc427d46120"
+  },
+  "mission": {
+    "frame": "map",
+    "units": {
+      "position": "m",
+      "yaw": "rad"
+    },
+    "waypoints": [
+      {
+        "x": 3.0,
+        "y": 0.0,
+        "yaw": 1.5707963267948966
+      },
+      {
+        "x": 3.0,
+        "y": 7.0,
+        "yaw": 0.0
+      },
+      {
+        "x": 5.0,
+        "y": 7.0,
+        "yaw": -1.5707963267948966
+      },
+      {
+        "x": 5.0,
+        "y": 0.0,
+        "yaw": 3.141592653589793
+      },
+      {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      }
+    ],
+    "start": {
+      "x": 0.0,
+      "y": 0.0,
+      "yaw": 0.0,
+      "position_tolerance": 0.35,
+      "yaw_tolerance": 0.4
+    },
+    "timeouts": {
+      "response": 15.0,
+      "trial": 600.0,
+      "cancel": 30.0
+    },
+    "status": "PROPOSED_FREEZE_AFTER_SCENARIO_QUALIFICATION_BEFORE_MEASURED_TRIALS"
+  },
+  "validation_policy": {
+    "xy_tolerance_m": 0.2,
+    "yaw_tolerance_rad": 0.25,
+    "tf_max_age_s": 1.0,
+    "localization_max_age_s": 5.0,
+    "max_xy_variance_m2": 0.25,
+    "max_yaw_variance_rad2": 0.25
+  },
+  "trial_strategy": "SIX_SERIAL_SINGLE_PROFILE_SINGLE_REPETITION_BACKEND_CAMPAIGNS",
+  "trials": [
+    {
+      "slot": "W01",
+      "order": 1,
+      "pair": 1,
+      "profile": "navfn_rpp",
+      "profile_trial_number": 1,
+      "state": "PLANNED",
+      "campaign_id": null,
+      "trial_id": null,
+      "experiment_id": null,
+      "mission_run_id": null,
+      "report_sha256": null,
+      "mcap_sha256": null,
+      "export_manifest_sha256": null
+    },
+    {
+      "slot": "W02",
+      "order": 2,
+      "pair": 1,
+      "profile": "smac_dwb",
+      "profile_trial_number": 1,
+      "state": "PLANNED",
+      "campaign_id": null,
+      "trial_id": null,
+      "experiment_id": null,
+      "mission_run_id": null,
+      "report_sha256": null,
+      "mcap_sha256": null,
+      "export_manifest_sha256": null
+    },
+    {
+      "slot": "W03",
+      "order": 3,
+      "pair": 2,
+      "profile": "smac_dwb",
+      "profile_trial_number": 2,
+      "state": "PLANNED",
+      "campaign_id": null,
+      "trial_id": null,
+      "experiment_id": null,
+      "mission_run_id": null,
+      "report_sha256": null,
+      "mcap_sha256": null,
+      "export_manifest_sha256": null
+    },
+    {
+      "slot": "W04",
+      "order": 4,
+      "pair": 2,
+      "profile": "navfn_rpp",
+      "profile_trial_number": 2,
+      "state": "PLANNED",
+      "campaign_id": null,
+      "trial_id": null,
+      "experiment_id": null,
+      "mission_run_id": null,
+      "report_sha256": null,
+      "mcap_sha256": null,
+      "export_manifest_sha256": null
+    },
+    {
+      "slot": "W05",
+      "order": 5,
+      "pair": 3,
+      "profile": "navfn_rpp",
+      "profile_trial_number": 3,
+      "state": "PLANNED",
+      "campaign_id": null,
+      "trial_id": null,
+      "experiment_id": null,
+      "mission_run_id": null,
+      "report_sha256": null,
+      "mcap_sha256": null,
+      "export_manifest_sha256": null
+    },
+    {
+      "slot": "W06",
+      "order": 6,
+      "pair": 3,
+      "profile": "smac_dwb",
+      "profile_trial_number": 3,
+      "state": "PLANNED",
+      "campaign_id": null,
+      "trial_id": null,
+      "experiment_id": null,
+      "mission_run_id": null,
+      "report_sha256": null,
+      "mcap_sha256": null,
+      "export_manifest_sha256": null
+    }
+  ],
+  "failure_policy": "STOP_ON_FAILURE_OR_UNCERTAIN_CLEANUP_NO_AUTOMATIC_RETRY_OR_REPLACEMENT",
+  "reset_policy": "FRESH_OWNED_STACK_PER_SLOT_NO_CONCURRENT_TRIALS",
+  "routing_guard_policy": "PRESERVE_UNCHANGED_NO_FAULT_ROUTE",
+  "release_gate": "SIX_GENUINE_ATTEMPTS_QUALIFIED_AND_SEPARATELY_APPROVED_STATIC_DATA_BEFORE_CLOUDFLARE"
+}

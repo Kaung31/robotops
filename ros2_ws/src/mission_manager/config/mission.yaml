@@ -1,0 +1,14 @@
+mission_manager:
+  ros__parameters:
+    artifact_root: artifacts/runs
+    robot_model: robotops_base
+    environment: unspecified
+    navigation_profile: unspecified
+    software_revision: ''
+    map_file: ''
+    global_frame: map
+    startup_timeout: 15.0
+    goal_timeout: 120.0
+    goal_wall_timeout: 180.0
+    response_timeout: 5.0
+    cancel_timeout: 5.0

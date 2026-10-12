@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot name="robotops_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="description_dir" default="$(find robot_description)"/>
+  <xacro:arg name="geometry_file" default="$(arg description_dir)/config/geometry.yaml"/>
+  <xacro:include filename="$(arg description_dir)/urdf/base.xacro"/>
+  <xacro:include filename="$(arg description_dir)/urdf/control.xacro"/>
+  <xacro:robot_base geometry_file="$(arg geometry_file)"/>
+  <xacro:wheel_control hardware_plugin="mock_components/GenericSystem">
+    <hardware_parameters><param name="calculate_dynamics">true</param></hardware_parameters>
+  </xacro:wheel_control>
+</robot>

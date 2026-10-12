@@ -1,0 +1,11 @@
+label: two_waypoint_demo
+record: true
+waypoints:
+  - header: {frame_id: map}
+    pose:
+      position: {x: 1.4, y: 0.6, z: 0.0}
+      orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
+  - header: {frame_id: map}
+    pose:
+      position: {x: 0.0, y: 0.0, z: 0.0}
+      orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}

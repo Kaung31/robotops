@@ -1,0 +1,27 @@
+slam_toolbox:
+  ros__parameters:
+    use_lifecycle_manager: false
+    solver_plugin: solver_plugins::CeresSolver
+    mode: mapping
+    map_frame: map
+    odom_frame: odom
+    base_frame: base_link
+    scan_topic: scan
+    use_map_saver: true
+    resolution: 0.05
+    min_laser_range: 0.12
+    max_laser_range: 12.0
+    throttle_scans: 1
+    scan_queue_size: 1
+    minimum_time_interval: 0.1
+    minimum_travel_distance: 0.1
+    minimum_travel_heading: 0.1
+    map_update_interval: 1.0
+    transform_publish_period: 0.02
+    transform_timeout: 0.3
+    tf_buffer_duration: 30.0
+    use_scan_matching: true
+    use_scan_barycenter: true
+    do_loop_closing: true
+    enable_interactive_mode: false
+    restamp_tf: false

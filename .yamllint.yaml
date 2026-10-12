@@ -1,0 +1,13 @@
+extends: default
+rules:
+  document-start: disable
+  line-length:
+    max: 100
+  truthy:
+    allowed-values: ['true', 'false']
+    check-keys: false
+ignore: |
+  .venv/
+  ros2_ws/build/
+  ros2_ws/install/
+  ros2_ws/log/

@@ -1,0 +1,50 @@
+{
+  "map_id": "warehouse_v1",
+  "name": "warehouse-navigation-v1-W03",
+  "profiles": [
+    "smac_dwb"
+  ],
+  "repetitions": 1,
+  "robot_model": "robotops_base",
+  "runtime_mode": "sim",
+  "start": {
+    "position_tolerance": 0.35,
+    "x": 0.0,
+    "y": 0.0,
+    "yaw": 0.0,
+    "yaw_tolerance": 0.4
+  },
+  "timeouts": {
+    "cancel": 30.0,
+    "response": 15.0,
+    "trial": 600.0
+  },
+  "waypoints": [
+    {
+      "x": 3.0,
+      "y": 0.0,
+      "yaw": 1.5707963267948966
+    },
+    {
+      "x": 3.0,
+      "y": 7.0,
+      "yaw": 0.0
+    },
+    {
+      "x": 5.0,
+      "y": 7.0,
+      "yaw": -1.5707963267948966
+    },
+    {
+      "x": 5.0,
+      "y": 0.0,
+      "yaw": 3.141592653589793
+    },
+    {
+      "x": 0.0,
+      "y": 0.0,
+      "yaw": 0.0
+    }
+  ],
+  "world": "warehouse_v1"
+}

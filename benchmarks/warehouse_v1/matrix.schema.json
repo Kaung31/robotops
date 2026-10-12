@@ -1,0 +1,398 @@
+{
+  "$defs": {
+    "CampaignPose": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "yaw": {
+          "default": 0.0,
+          "title": "Yaw",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "CampaignPose",
+      "type": "object"
+    },
+    "CampaignTimeouts": {
+      "additionalProperties": false,
+      "properties": {
+        "cancel": {
+          "default": 30,
+          "maximum": 120,
+          "minimum": 1,
+          "title": "Cancel",
+          "type": "number"
+        },
+        "response": {
+          "default": 15,
+          "maximum": 120,
+          "minimum": 1,
+          "title": "Response",
+          "type": "number"
+        },
+        "trial": {
+          "default": 180,
+          "maximum": 3600,
+          "minimum": 1,
+          "title": "Trial",
+          "type": "number"
+        }
+      },
+      "title": "CampaignTimeouts",
+      "type": "object"
+    },
+    "FilePin": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "title": "FilePin",
+      "type": "object"
+    },
+    "Mission": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "const": "map",
+          "title": "Frame",
+          "type": "string"
+        },
+        "position_unit": {
+          "const": "m",
+          "title": "Position Unit",
+          "type": "string"
+        },
+        "start": {
+          "$ref": "#/$defs/StartCondition"
+        },
+        "timeouts": {
+          "$ref": "#/$defs/CampaignTimeouts"
+        },
+        "validation_policy": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Validation Policy",
+          "type": "object"
+        },
+        "waypoints": {
+          "items": {
+            "$ref": "#/$defs/CampaignPose"
+          },
+          "title": "Waypoints",
+          "type": "array"
+        },
+        "yaw_unit": {
+          "const": "rad",
+          "title": "Yaw Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame",
+        "position_unit",
+        "yaw_unit",
+        "waypoints",
+        "start",
+        "timeouts",
+        "validation_policy"
+      ],
+      "title": "Mission",
+      "type": "object"
+    },
+    "Profile": {
+      "additionalProperties": false,
+      "properties": {
+        "effective_parameters_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Effective Parameters Sha256",
+          "type": "string"
+        },
+        "provenance": {
+          "const": "UNKNOWN_PUBLIC_INCLUSION_HELD",
+          "title": "Provenance",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/FilePin"
+        }
+      },
+      "required": [
+        "source",
+        "effective_parameters_sha256",
+        "provenance"
+      ],
+      "title": "Profile",
+      "type": "object"
+    },
+    "Scenario": {
+      "additionalProperties": false,
+      "properties": {
+        "descriptor": {
+          "$ref": "#/$defs/FilePin"
+        },
+        "id": {
+          "const": "warehouse_v1",
+          "title": "Id",
+          "type": "string"
+        },
+        "initial_conditions": {
+          "const": "REQUESTED_ONLY_NOT_OBSERVED",
+          "title": "Initial Conditions",
+          "type": "string"
+        },
+        "map_image": {
+          "$ref": "#/$defs/FilePin"
+        },
+        "map_metadata": {
+          "$ref": "#/$defs/FilePin"
+        },
+        "map_yaml": {
+          "$ref": "#/$defs/FilePin"
+        },
+        "qualification": {
+          "const": "OFFLINE_ONLY_RUNTIME_UNQUALIFIED",
+          "title": "Qualification",
+          "type": "string"
+        },
+        "seed": {
+          "default": null,
+          "title": "Seed",
+          "type": "null"
+        },
+        "stochastic_determinism": {
+          "const": "UNQUALIFIED_SEEDS_UNKNOWN",
+          "title": "Stochastic Determinism",
+          "type": "string"
+        },
+        "world": {
+          "$ref": "#/$defs/FilePin"
+        }
+      },
+      "required": [
+        "id",
+        "qualification",
+        "descriptor",
+        "world",
+        "map_yaml",
+        "map_image",
+        "map_metadata",
+        "initial_conditions",
+        "stochastic_determinism"
+      ],
+      "title": "Scenario",
+      "type": "object"
+    },
+    "Slot": {
+      "additionalProperties": false,
+      "properties": {
+        "config_ref": {
+          "title": "Config Ref",
+          "type": "string"
+        },
+        "config_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Config Sha256",
+          "type": "string"
+        },
+        "pair": {
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Pair",
+          "type": "integer"
+        },
+        "profile": {
+          "enum": [
+            "navfn_rpp",
+            "smac_dwb"
+          ],
+          "title": "Profile",
+          "type": "string"
+        },
+        "profile_trial": {
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Profile Trial",
+          "type": "integer"
+        },
+        "slot": {
+          "enum": [
+            "W01",
+            "W02",
+            "W03",
+            "W04",
+            "W05",
+            "W06"
+          ],
+          "title": "Slot",
+          "type": "string"
+        },
+        "state": {
+          "const": "PLANNED",
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slot",
+        "profile",
+        "profile_trial",
+        "pair",
+        "state",
+        "config_ref",
+        "config_sha256"
+      ],
+      "title": "Slot",
+      "type": "object"
+    },
+    "StartCondition": {
+      "additionalProperties": false,
+      "properties": {
+        "position_tolerance": {
+          "default": 0.35,
+          "exclusiveMinimum": 0,
+          "maximum": 10,
+          "title": "Position Tolerance",
+          "type": "number"
+        },
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "yaw": {
+          "default": 0.0,
+          "title": "Yaw",
+          "type": "number"
+        },
+        "yaw_tolerance": {
+          "default": 0.4,
+          "exclusiveMinimum": 0,
+          "maximum": 3.141592653589793,
+          "title": "Yaw Tolerance",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "StartCondition",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "authority": {
+      "const": "OFFLINE_PLAN_NOT_EXECUTION_AUTHORIZATION",
+      "title": "Authority",
+      "type": "string"
+    },
+    "comparison": {
+      "const": "PLANNER_CONTROLLER_BUNDLES_N3_NO_SUPERIORITY_CLAIM",
+      "title": "Comparison",
+      "type": "string"
+    },
+    "execution_approved": {
+      "title": "Execution Approved",
+      "type": "boolean"
+    },
+    "failure_policy": {
+      "const": "STOP_NO_AUTOMATIC_RETRY_OR_REPLACEMENT",
+      "title": "Failure Policy",
+      "type": "string"
+    },
+    "id": {
+      "const": "warehouse-navigation-v1",
+      "title": "Id",
+      "type": "string"
+    },
+    "mission": {
+      "$ref": "#/$defs/Mission"
+    },
+    "profiles": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Profile"
+      },
+      "title": "Profiles",
+      "type": "object"
+    },
+    "publication_approved": {
+      "title": "Publication Approved",
+      "type": "boolean"
+    },
+    "reset_policy": {
+      "const": "FRESH_OWNED_STACK_PER_SLOT",
+      "title": "Reset Policy",
+      "type": "string"
+    },
+    "scenario": {
+      "$ref": "#/$defs/Scenario"
+    },
+    "schema_version": {
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "shared": {
+      "items": {
+        "$ref": "#/$defs/FilePin"
+      },
+      "title": "Shared",
+      "type": "array"
+    },
+    "trials": {
+      "items": {
+        "$ref": "#/$defs/Slot"
+      },
+      "maxItems": 6,
+      "minItems": 6,
+      "title": "Trials",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "authority",
+    "comparison",
+    "execution_approved",
+    "publication_approved",
+    "scenario",
+    "mission",
+    "profiles",
+    "shared",
+    "trials",
+    "failure_policy",
+    "reset_policy"
+  ],
+  "title": "WarehouseMatrix",
+  "type": "object"
+}

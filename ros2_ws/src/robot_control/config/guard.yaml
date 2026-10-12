@@ -1,0 +1,4 @@
+command_guard:
+  ros__parameters:
+    max_age: 0.3
+    future_tolerance: 0.05

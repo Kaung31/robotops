@@ -1,0 +1,56 @@
+# W3 adapter contract; generic recorder defaults remain unchanged.
+topics:
+- odom
+- tf
+- tf_static
+- joint_states
+- scan
+- imu/data
+- map
+- cmd_vel/autonomy
+- drive_controller/cmd_vel
+- /clock
+- validation/contacts
+- diagnostics
+required_topics:
+- odom
+- tf
+- tf_static
+qos:
+  diagnostics:
+    reliability: reliable
+    durability: volatile
+    depth: 10
+  validation/contacts:
+    reliability: reliable
+    durability: volatile
+    depth: 100
+  tf:
+    reliability: reliable
+    durability: volatile
+    depth: 100
+  tf_static:
+    reliability: reliable
+    durability: transient_local
+    depth: 1
+  map:
+    reliability: reliable
+    durability: transient_local
+    depth: 1
+  scan:
+    reliability: best_effort
+    durability: volatile
+    depth: 10
+  imu/data:
+    reliability: best_effort
+    durability: volatile
+    depth: 10
+startup_topics:
+- odom
+- tf
+- tf_static
+- map
+- scan
+- imu/data
+- /clock
+- validation/contacts

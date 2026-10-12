@@ -1,0 +1,41 @@
+# Colcon and local tooling
+build/
+install/
+log/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+# Frontend generated dependencies/builds
+node_modules/
+web/dist/
+
+# Local configuration and large recordings
+.env
+.env.*
+!.env.example
+*.mcap
+*.db3
+# Generated map artifacts (save outside package sources)
+artifacts/
+*.egg-info/
+*.tsbuildinfo
+
+# Private staging, archives, local credentials and metadata
+docs/archive/
+release-candidate/
+private-release/
+*.pem
+*.key
+*.p12
+*.pfx
+*.sqlite
+*.sqlite3
+*.db
+*.tar
+*.tar.gz
+*.zip
+.wrangler/
+.dev.vars
+candidate-data/

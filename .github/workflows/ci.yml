@@ -1,0 +1,184 @@
+name: Robot foundation CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  portable:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Python formatting and lint
+        run: |
+          ruff format --check .
+          ruff check .
+      - name: C++ formatting
+        run: |
+          find ros2_ws/src -type f \( -name '*.cpp' -o -name '*.hpp' \) \
+            -exec clang-format --dry-run --Werror {} +
+      - name: YAML and CMake lint
+        run: |
+          yamllint .
+          find ros2_ws/src -name CMakeLists.txt -exec cmake-lint {} +
+          find ros2_ws/src -name CMakeLists.txt -exec cmake-format --check {} +
+      - name: XML syntax and model contracts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxml2-utils
+          find ros2_ws/src -type f \( -name '*.xml' -o -name '*.xacro' -o -name '*.sdf' \) \
+            -exec xmllint --noout {} +
+          python -m pytest -q
+
+  web:
+    name: Web typecheck and build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install web dependencies
+        working-directory: web
+        run: npm install --no-audit --no-fund
+      - name: Polling regression tests
+        working-directory: web
+        run: npm test
+      - name: Typecheck
+        working-directory: web
+        run: npm run typecheck
+      - name: Build
+        working-directory: web
+        run: npm run build
+      - name: Build read-only replay code (no private data)
+        working-directory: web
+        run: npm run build:replay
+
+  jazzy:
+    name: Jazzy ${{ matrix.suite }}
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [mock, sim, mapping, navigation, mission, experiment]
+    runs-on: ubuntu-24.04
+    container: ros:jazzy-ros-base-noble
+    defaults:
+      run:
+        shell: bash
+    env:
+      ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
+      ROS_DOMAIN_ID: '87'
+      # RobotOps uses Cyclone DDS for deterministic full-stack CI. The archived
+      # Fast DDS baseline showed a response-delivery race in a mission action.
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install package and test dependencies
+        run: |
+          apt-get update
+          apt-get install -y python3-colcon-common-extensions python3-rosdep \
+            python3-venv liburdfdom-tools \
+            xvfb xauth libgl1-mesa-dri ros-jazzy-rmw-cyclonedds-cpp
+          if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then rosdep init; fi
+          rosdep update --rosdistro jazzy
+          rosdep install --from-paths ros2_ws/src --ignore-src --rosdistro jazzy -r -y
+      - name: Build
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          cd ros2_ws
+          colcon build --event-handlers console_direct+
+          if [ "${{ matrix.suite }}" = sim ]; then
+            colcon build --packages-select robot_bringup --cmake-args -DROBOTOPS_SIM_TESTS=ON
+            colcon build --packages-select robot_simulation \
+              --cmake-args -DROBOTOPS_GAZEBO_SHUTDOWN_TESTS=ON
+          elif [ "${{ matrix.suite }}" = mapping ]; then
+            colcon build --packages-select robot_navigation --cmake-args -DROBOTOPS_MAPPING_TESTS=ON
+          elif [ "${{ matrix.suite }}" = navigation ]; then
+            colcon build --packages-select robot_navigation \
+              --cmake-args -DROBOTOPS_NAVIGATION_TESTS=ON
+          elif [ "${{ matrix.suite }}" = mission ]; then
+            colcon build --packages-select mission_manager \
+              --cmake-args -DROBOTOPS_MISSION_SIM_TESTS=ON
+          elif [ "${{ matrix.suite }}" = experiment ]; then
+            colcon build --packages-select experiment_runner \
+              --cmake-args -DROBOTOPS_EXPERIMENT_SIM_TESTS=ON
+          fi
+      - name: Check installed resources outside the source tree
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source ros2_ws/install/setup.bash
+          cd /tmp
+          xacro "$(ros2 pkg prefix --share robot_description)/urdf/robot.urdf.xacro" \
+            -o /tmp/robotops.urdf
+          check_urdf /tmp/robotops.urdf
+          ros2 launch robot_description description.launch.py --show-args
+      - name: Gateway callback scheduling regression
+        if: matrix.suite == 'mock'
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source ros2_ws/install/setup.bash
+          python3 -m venv --system-site-packages "$RUNNER_TEMP/robotops-gateway-tests"
+          "$RUNNER_TEMP/robotops-gateway-tests/bin/pip" install \
+            -c requirements-dev.txt pydantic pytest
+          "$RUNNER_TEMP/robotops-gateway-tests/bin/python" -m pytest -q \
+            backend/tests/test_ros_gateway_callbacks.py
+      - name: Test
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source ros2_ws/install/setup.bash
+          cd ros2_ws
+          if [ "${{ matrix.suite }}" = sim ]; then
+            xvfb-run -a colcon test --packages-select robot_bringup robot_simulation \
+              --return-code-on-test-failure --event-handlers console_direct+ \
+              --ctest-args -R '^(sim_control|gazebo_shutdown)$'
+          elif [ "${{ matrix.suite }}" = mapping ]; then
+            xvfb-run -a colcon test --packages-select robot_navigation \
+              --return-code-on-test-failure --event-handlers console_direct+ \
+              --ctest-args -R '^mapping_system$'
+          elif [ "${{ matrix.suite }}" = navigation ]; then
+            xvfb-run -a colcon test --packages-select robot_navigation \
+              --return-code-on-test-failure --event-handlers console_direct+ \
+              --ctest-args -R '^navigation_system$'
+          elif [ "${{ matrix.suite }}" = mission ]; then
+            xvfb-run -a colcon test --packages-select mission_manager \
+              --return-code-on-test-failure --event-handlers console_direct+ \
+              --ctest-args -R '^mission_system$'
+          elif [ "${{ matrix.suite }}" = experiment ]; then
+            xvfb-run -a colcon test --packages-select experiment_runner \
+              --return-code-on-test-failure --event-handlers console_direct+ \
+              --ctest-args -R '^experiment_system$'
+          else
+            colcon test --event-handlers console_direct+ --return-code-on-test-failure
+          fi
+      - name: Loaded rendered robot backend shutdown regression
+        if: matrix.suite == 'sim'
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source ros2_ws/install/setup.bash
+          python3 -m venv --system-site-packages "$RUNNER_TEMP/robotops-shutdown-tests"
+          "$RUNNER_TEMP/robotops-shutdown-tests/bin/pip" install \
+            -c requirements-dev.txt pydantic pytest
+          "$RUNNER_TEMP/robotops-shutdown-tests/bin/python" -m pytest -q \
+            -p no:launch_testing -p no:launch_ros backend/tests/runtime_loaded_shutdown.py
+      - name: Report test results
+        if: always()
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          cd ros2_ws
+          colcon test-result --verbose
+      - name: Upload build and test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jazzy-${{ matrix.suite }}-test-results
+          path: |
+            ros2_ws/log/
+            ros2_ws/build/*/test_results/

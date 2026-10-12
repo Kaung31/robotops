@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "world_id": "warehouse_v1",
+  "provenance": "Original RobotOps primitive geometry implementing owner-approved 2026-10-12 warehouse plan; no external models, textures or assets. Analytic occupancy is configuration-derived, not observed telemetry.",
+  "physics": {
+    "max_step_size_s": 0.001,
+    "real_time_factor": 1.0
+  },
+  "map": {
+    "resolution_m": 0.05,
+    "origin_m": [
+      -2.1,
+      -1.6
+    ],
+    "width": 244,
+    "height": 204
+  },
+  "boxes": [
+    {
+      "name": "south_wall",
+      "centre_m": [
+        4.0,
+        -1.5,
+        0.6
+      ],
+      "size_m": [
+        12.2,
+        0.2,
+        1.2
+      ]
+    },
+    {
+      "name": "north_wall",
+      "centre_m": [
+        4.0,
+        8.5,
+        0.6
+      ],
+      "size_m": [
+        12.2,
+        0.2,
+        1.2
+      ]
+    },
+    {
+      "name": "west_wall",
+      "centre_m": [
+        -2.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        0.2,
+        10.0,
+        1.2
+      ]
+    },
+    {
+      "name": "east_wall",
+      "centre_m": [
+        10.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        0.2,
+        10.0,
+        1.2
+      ]
+    },
+    {
+      "name": "rack_1",
+      "centre_m": [
+        2.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        0.8,
+        4.0,
+        1.2
+      ]
+    },
+    {
+      "name": "rack_2",
+      "centre_m": [
+        4.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        0.8,
+        4.0,
+        1.2
+      ]
+    },
+    {
+      "name": "rack_3",
+      "centre_m": [
+        6.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        0.8,
+        4.0,
+        1.2
+      ]
+    }
+  ]
+}

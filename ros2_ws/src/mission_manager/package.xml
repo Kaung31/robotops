@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>mission_manager</name>
+  <version>0.5.0</version>
+  <description>Backend-independent ordered navigation missions.</description>
+  <maintainer email="kai@example.com">Kai</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>robotops_interfaces</exec_depend>
+  <exec_depend>robot_recorder</exec_depend>
+  <exec_depend>nav2_msgs</exec_depend>
+  <exec_depend>action_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  <test_depend>rosbag2_py</test_depend>
+  <test_depend>tf2_msgs</test_depend>
+  <test_depend>nav_msgs</test_depend>
+  <test_depend>rosgraph_msgs</test_depend>
+  <exec_depend>rcl_interfaces</exec_depend>
+  <test_depend>lifecycle_msgs</test_depend>
+  <test_depend>tf2_ros_py</test_depend>
+  <test_depend>sensor_msgs</test_depend>
+  <test_depend>robot_navigation</test_depend>
+  <test_depend>robot_bringup</test_depend>
+  <test_depend>robot_simulation</test_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

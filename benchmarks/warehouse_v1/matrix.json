@@ -1,0 +1,233 @@
+{
+  "authority": "OFFLINE_PLAN_NOT_EXECUTION_AUTHORIZATION",
+  "comparison": "PLANNER_CONTROLLER_BUNDLES_N3_NO_SUPERIORITY_CLAIM",
+  "execution_approved": false,
+  "failure_policy": "STOP_NO_AUTOMATIC_RETRY_OR_REPLACEMENT",
+  "id": "warehouse-navigation-v1",
+  "mission": {
+    "frame": "map",
+    "position_unit": "m",
+    "start": {
+      "position_tolerance": 0.35,
+      "x": 0.0,
+      "y": 0.0,
+      "yaw": 0.0,
+      "yaw_tolerance": 0.4
+    },
+    "timeouts": {
+      "cancel": 30.0,
+      "response": 15.0,
+      "trial": 600.0
+    },
+    "validation_policy": {
+      "localization_max_age_s": 5.0,
+      "max_xy_variance_m2": 0.25,
+      "max_yaw_variance_rad2": 0.25,
+      "tf_max_age_s": 1.0,
+      "xy_tolerance_m": 0.2,
+      "yaw_tolerance_rad": 0.25
+    },
+    "waypoints": [
+      {
+        "x": 3.0,
+        "y": 0.0,
+        "yaw": 1.5707963267948966
+      },
+      {
+        "x": 3.0,
+        "y": 7.0,
+        "yaw": 0.0
+      },
+      {
+        "x": 5.0,
+        "y": 7.0,
+        "yaw": -1.5707963267948966
+      },
+      {
+        "x": 5.0,
+        "y": 0.0,
+        "yaw": 3.141592653589793
+      },
+      {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      }
+    ],
+    "yaw_unit": "rad"
+  },
+  "profiles": {
+    "navfn_rpp": {
+      "effective_parameters_sha256": "c3a0081674c509e122863098c328d87d96b1ea8972b1763d882f7630fdd366a5",
+      "provenance": "UNKNOWN_PUBLIC_INCLUSION_HELD",
+      "source": {
+        "path": "ros2_ws/src/robot_navigation/config/profiles/navfn_rpp.yaml",
+        "sha256": "b2773fafd39a85ce43b5ae3f90f015b314b12fdf469a26c5b999bdfac5694feb"
+      }
+    },
+    "smac_dwb": {
+      "effective_parameters_sha256": "a329fe7794b47802c8e8c9c003b7010d0e8bec242783f8c5645eceda7a07e544",
+      "provenance": "UNKNOWN_PUBLIC_INCLUSION_HELD",
+      "source": {
+        "path": "ros2_ws/src/robot_navigation/config/profiles/smac_dwb.yaml",
+        "sha256": "c612b7a0f162854f9ecde5a270ca642a8bf35c3a3618ab411c01d33a2df18ba9"
+      }
+    }
+  },
+  "publication_approved": false,
+  "reset_policy": "FRESH_OWNED_STACK_PER_SLOT",
+  "scenario": {
+    "descriptor": {
+      "path": "ros2_ws/src/robot_simulation/config/warehouse_v1.json",
+      "sha256": "78fe79f66bcc7d0bd7153f8b508561ebd26a9d097371575da3ba0d18b34ae2b6"
+    },
+    "id": "warehouse_v1",
+    "initial_conditions": "REQUESTED_ONLY_NOT_OBSERVED",
+    "map_image": {
+      "path": "artifacts/maps/warehouse_v1.pgm",
+      "sha256": "1eb988b083d384dd94f4e44e0370effc9e26755c899896bda51f7446829199e9"
+    },
+    "map_metadata": {
+      "path": "artifacts/maps/warehouse_v1.robotops.json",
+      "sha256": "f1c336133d60d87a897ec9aa39eb7478ccfe5154097279f8df457e4e494772ee"
+    },
+    "map_yaml": {
+      "path": "artifacts/maps/warehouse_v1.yaml",
+      "sha256": "b2d1d5f501dfcd48dad0164d08656542b820abb141650216c51db5ce5446b2c3"
+    },
+    "qualification": "OFFLINE_ONLY_RUNTIME_UNQUALIFIED",
+    "seed": null,
+    "stochastic_determinism": "UNQUALIFIED_SEEDS_UNKNOWN",
+    "world": {
+      "path": "ros2_ws/src/robot_simulation/worlds/warehouse_v1.sdf",
+      "sha256": "2ec801075249160fd702ef936d05be1d97a33b3b31fb36b1ce302b456f2ac0a2"
+    }
+  },
+  "schema_version": 1,
+  "shared": [
+    {
+      "path": "ros2_ws/src/robot_navigation/config/navigation.yaml",
+      "sha256": "730e72a252dfc551a336295c110709cd5b7cd0a630c86fea8001778f94594d39"
+    },
+    {
+      "path": "ros2_ws/src/robot_navigation/config/localization.yaml",
+      "sha256": "37fda2bdb0dcc98ad5727d73b820fb11bf6847a016eafc452c2a720173ed466e"
+    },
+    {
+      "path": "ros2_ws/src/robot_navigation/robot_navigation/navigation_config.py",
+      "sha256": "ed2b0de94b8bb554e7d2004d90d0048d5d8e2a6852f017c1ee864c51c5dd177a"
+    },
+    {
+      "path": "ros2_ws/src/robot_navigation/launch/navigation.launch.py",
+      "sha256": "f6e4d0c0e110be7256840511f48b11a2c5504c7971ef3b233b665ad418a997fc"
+    },
+    {
+      "path": "ros2_ws/src/robot_description/config/geometry.yaml",
+      "sha256": "bd180e8e4b84b30e11f38b452cd248e53c505eee9bbdce117b9441af7f9c997f"
+    },
+    {
+      "path": "ros2_ws/src/robot_description/urdf/base.xacro",
+      "sha256": "8d4304262871e65b2cf5a6eeabcbca22de2155bf69a20a43fd9071ddc46631e2"
+    },
+    {
+      "path": "ros2_ws/src/robot_control/config/controllers.yaml",
+      "sha256": "7ad9b4b972e8552ada36b4c6333dc666f0550c3d5839e0fb45c2feda36dbb9d5"
+    },
+    {
+      "path": "ros2_ws/src/robot_control/config/mux.yaml",
+      "sha256": "8efbdafa00147a03cf8121491edf9465a48378a6494640f4307a7c467ded8112"
+    },
+    {
+      "path": "ros2_ws/src/robot_control/config/guard.yaml",
+      "sha256": "9cf29a3a85220a4d5bed39f926697a1dadebdbef21f96200564ec1d61131cf47"
+    },
+    {
+      "path": "ros2_ws/src/robot_recorder/config/recording.yaml",
+      "sha256": "81f10735f9498f7618eabd9a159d4a448a5efb4c14c1c98634229dc427d46120"
+    },
+    {
+      "path": "ros2_ws/src/mission_manager/config/mission.yaml",
+      "sha256": "4cd1e5371feb1e89b3c25cf69add0667a372b6878e5591332c3677b1ab6a9be4"
+    },
+    {
+      "path": "ros2_ws/src/robot_simulation/config/bridge.yaml",
+      "sha256": "aa3b76cdde7b2a5404a31f0e7d9fd6b3a7c682313a17131979d7595659132943"
+    },
+    {
+      "path": "ros2_ws/src/robot_simulation/urdf/gazebo.urdf.xacro",
+      "sha256": "4e6ba80c36c4356d8d4e72d1b2554d62f58d5130afcf69bb3c34e6c0004aa3c1"
+    },
+    {
+      "path": "ros2_ws/src/robot_simulation/launch/gazebo.launch.py",
+      "sha256": "89e1f1f08125821e86813175aeaa5f70d363033f519bbb198c1d9c3256e1e2c1"
+    },
+    {
+      "path": "ros2_ws/src/robot_bringup/launch/robot.launch.py",
+      "sha256": "a1fd4c16df3852a6e86236c49a0231444012b54cb4018bc422e8fc88d1517a31"
+    },
+    {
+      "path": "ros2_ws/src/robot_simulation/src/gazebo_runner.cpp",
+      "sha256": "710e925aa12db89a286f26baabc56096b18b548bfac792e37ac4e7ca0fa823bf"
+    },
+    {
+      "path": "scripts/warehouse_scenario.py",
+      "sha256": "ba11294f17c9935286563cee0c9bb92e45ae571e9384a3b42b5f5855b14db40e"
+    }
+  ],
+  "trials": [
+    {
+      "config_ref": "benchmarks/warehouse_v1/campaigns/W01.json",
+      "config_sha256": "9a0be550d35a5a1d9e582eb46e24136ec426df40eb0a4a0af0e3fca25b0d4927",
+      "pair": 1,
+      "profile": "navfn_rpp",
+      "profile_trial": 1,
+      "slot": "W01",
+      "state": "PLANNED"
+    },
+    {
+      "config_ref": "benchmarks/warehouse_v1/campaigns/W02.json",
+      "config_sha256": "392afb5102c714d1f08afd51b2cca87b7f51244ec0a6e1326536ddb11dbc8552",
+      "pair": 1,
+      "profile": "smac_dwb",
+      "profile_trial": 1,
+      "slot": "W02",
+      "state": "PLANNED"
+    },
+    {
+      "config_ref": "benchmarks/warehouse_v1/campaigns/W03.json",
+      "config_sha256": "b6469797f99b2056507315001470873599d8511a6adb2e7372ff3b4db606b6bb",
+      "pair": 2,
+      "profile": "smac_dwb",
+      "profile_trial": 2,
+      "slot": "W03",
+      "state": "PLANNED"
+    },
+    {
+      "config_ref": "benchmarks/warehouse_v1/campaigns/W04.json",
+      "config_sha256": "56def6056adba73e4e1e79076865d2f5d052c070aa8c6f71d0d7a7cfc258ef62",
+      "pair": 2,
+      "profile": "navfn_rpp",
+      "profile_trial": 2,
+      "slot": "W04",
+      "state": "PLANNED"
+    },
+    {
+      "config_ref": "benchmarks/warehouse_v1/campaigns/W05.json",
+      "config_sha256": "bae268d33d683394ed89f17e4755b84d633047e4e807f28efabfe7cca981c4f6",
+      "pair": 3,
+      "profile": "navfn_rpp",
+      "profile_trial": 3,
+      "slot": "W05",
+      "state": "PLANNED"
+    },
+    {
+      "config_ref": "benchmarks/warehouse_v1/campaigns/W06.json",
+      "config_sha256": "33b08da514c559e18b83f71af6a65024956fe7888aa69a94e2c94699a889063e",
+      "pair": 3,
+      "profile": "smac_dwb",
+      "profile_trial": 3,
+      "slot": "W06",
+      "state": "PLANNED"
+    }
+  ]
+}

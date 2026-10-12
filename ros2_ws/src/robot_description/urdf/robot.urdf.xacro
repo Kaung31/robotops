@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<robot name="robotops_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="geometry_file" default="../config/geometry.yaml"/>
+  <xacro:include filename="base.xacro"/>
+  <xacro:robot_base geometry_file="$(arg geometry_file)"/>
+</robot>
