@@ -7,7 +7,8 @@ await rename(resolve(out, 'portfolio.html'), resolve(out, 'index.html'));
 // the release record pinning exactly which dataset manifests it covers.
 for (const name of ['_headers', '_redirects', '404.html', 'DATA-LICENSE.txt', 'RELEASE.json']) await copyFile(resolve(web, 'release-config', name), resolve(out, name));
 // Deliberately no dataset copy: clean builds need only the source lockfile.
-await writeFile(resolve(out, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
+// The owner approved search-engine indexing of the public site on 2026-10-13.
+await writeFile(resolve(out, 'robots.txt'), 'User-agent: *\nAllow: /\n');
 let notices = 'RobotOps website — third-party notices.\nRobotOps source code: Apache-2.0 (see the repository). Recorded Lab datasets: CC BY 4.0 (see /DATA-LICENSE.txt).\n\nBundled runtime dependencies and their notices:\n';
 for (const name of ['react', 'react-dom', 'scheduler', 'three']) {
   const pkg = JSON.parse(await readFile(resolve(web, 'node_modules', name, 'package.json'), 'utf8'));
@@ -18,6 +19,11 @@ for (const name of ['react', 'react-dom', 'scheduler', 'three']) {
 const vite = JSON.parse(await readFile(resolve(web, 'node_modules', 'vite', 'package.json'), 'utf8'));
 const viteLicence = (await readFile(resolve(web, 'node_modules', 'vite', 'LICENSE.md'), 'utf8')).split('\n# Licenses of bundled dependencies')[0];
 notices += `\n--- vite ${vite.version} module-preload polyfill (${vite.license}) ---\n${viteLicence.trim()}\n`;
+// Rollup's CommonJS interop helper (getDefaultExportFromCjs) also reaches the site
+// code; Vite bundles @rollup/plugin-commonjs and lists its MIT notice.
+const rollup = /\n## @rollup\/plugin-alias, @rollup\/plugin-commonjs[^\n]*\n([\s\S]*?)\n-{10,}/.exec(await readFile(resolve(web, 'node_modules', 'vite', 'LICENSE.md'), 'utf8'));
+if (!rollup) throw Error('Rollup plugin notice not found in Vite licence');
+notices += `\n--- @rollup/plugin-commonjs helper, bundled in vite ${vite.version} (MIT) ---\n${rollup[1].replace(/^> ?/gm, '').trim()}\n`;
 await writeFile(resolve(out, 'THIRD_PARTY_NOTICES.txt'), notices);
 const entries = await readdir(out);
 if (entries.some(name => !['index.html', 'replay.html', 'assets', '_headers', '_redirects', '404.html', 'robots.txt', 'THIRD_PARTY_NOTICES.txt', 'DATA-LICENSE.txt', 'RELEASE.json'].includes(name))) throw Error('Unexpected site output');

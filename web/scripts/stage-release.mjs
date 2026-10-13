@@ -74,7 +74,7 @@ export function exposure(path) {
   if (path.startsWith('_')) return 'Static host routing/security configuration only.';
   if (path === 'DATA-LICENSE.txt') return 'Owner-approved CC BY 4.0 licence for the eight pinned datasets, attribution text and the GitHub link.';
   if (path === 'RELEASE.json') return 'Release record: CC BY 4.0, approval date, attribution and the eight pinned dataset manifest hashes.';
-  return 'Homepage/lab page shell, owner-supplied GitHub link, error page or no-index robots directive.';
+  return 'Homepage/lab page shell, owner-supplied GitHub link, error page or robots directive allowing indexing (owner-approved).';
 }
 export async function stage(output) {
   const web = resolve(dirname(fileURLToPath(import.meta.url)), '..'), repo = resolve(web, '..');

@@ -40,7 +40,7 @@ test('homepage route figure is the recorded W01 route and never enters an aisle'
 });
 test('site build is a separate code-only multipage entry with no proxy/public assets',async()=>{
  const source=await read('../vite.site.config.ts');assert.match(source,/publicDir: false/);assert.match(source,/portfolio.html/);assert.match(source,/replay.html/);assert.doesNotMatch(source,/proxy\s*:|index.html/);
- const finalize=await read('../scripts/finalize-site.mjs');assert.doesNotMatch(finalize,/artifacts\/|p4b-export/);assert.match(finalize,/robots.txt/);assert.match(finalize,/module-preload polyfill/);assert.match(finalize,/Licenses of bundled dependencies/);assert.match(finalize,/'DATA-LICENSE.txt', 'RELEASE.json'\]\) await copyFile/);assert.doesNotMatch(finalize,/publication not approved/);
+ const finalize=await read('../scripts/finalize-site.mjs');assert.doesNotMatch(finalize,/artifacts\/|p4b-export/);assert.match(finalize,/robots.txt/);assert.match(finalize,/module-preload polyfill/);assert.match(finalize,/Licenses of bundled dependencies/);assert.match(finalize,/'DATA-LICENSE.txt', 'RELEASE.json'\]\) await copyFile/);assert.doesNotMatch(finalize,/publication not approved/);assert.match(finalize,/'User-agent: \*\\nAllow: \/\\n'/);assert.doesNotMatch(finalize,/Disallow/);assert.match(finalize,/@rollup\\\/plugin-commonjs/);
  assert.match(await read('../release-config/_headers'),/connect-src 'self'/);assert.equal(await read('../release-config/_redirects'),'/lab /replay.html 302\n/lab/ /replay.html 302\n');
 });
 test('stager forbids public/output reuse and unknown dataset, exposes inventory categories',async()=>{
