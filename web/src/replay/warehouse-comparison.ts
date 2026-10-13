@@ -8,6 +8,7 @@ type Metric = typeof COMPARABLE[number]["name"];
 export interface TrialRow {
   id: WarehouseId; profile: Profile; available: boolean;
   values: Record<Metric, number | null>;
+  outcome: string | null; goals: number | null;
   pose: string | null; contact: string | null; teardown: WarehouseManifest["teardown"]["status"] | null;
 }
 export interface Summary { mean: number | null; min: number | null; max: number | null; n: number }
@@ -17,7 +18,7 @@ export function trialRows(originals: WarehouseOriginals): TrialRow[] {
   return WAREHOUSE_IDS.map(id => {
     const m = originals[id];
     const values = Object.fromEntries(COMPARABLE.map(check => [check.name, measured(m?.metrics, check)])) as Record<Metric, number | null>;
-    return { id, profile: WAREHOUSE[id].profile, available: !!m, values, pose: m?.original_validation.pose_verdict ?? null, contact: m?.original_validation.contact_verdict ?? null, teardown: m?.teardown.status ?? null };
+    return { id, profile: WAREHOUSE[id].profile, available: !!m, values, outcome: m?.original_validation.ros_outcome ?? null, goals: m?.conditions.waypoints.length ?? null, pose: m?.original_validation.pose_verdict ?? null, contact: m?.original_validation.contact_verdict ?? null, teardown: m?.teardown.status ?? null };
   });
 }
 // A configuration summary needs every planned trial; a partial mean would silently change n.
@@ -37,4 +38,11 @@ export function verdictCounts(rows: TrialRow[], profile: Profile, key: "pose" | 
   const counts = new Map<string, number>();
   for (const r of planned) counts.set(r[key]!, (counts.get(r[key]!) ?? 0) + 1);
   return [...counts].map(([verdict, n]) => `${verdict} ${n}/${planned.length}`).join(" · ");
+}
+// True only when all six values are verified and every trial of `lower` is below
+// every trial of `higher`; overlapping or missing values never produce a finding.
+export function separated(rows: TrialRow[], lower: Profile, higher: Profile, metric: Metric): boolean {
+  const a = rows.filter(r => r.profile === lower).map(r => r.values[metric]), b = rows.filter(r => r.profile === higher).map(r => r.values[metric]);
+  if (!a.length || !b.length || [...a, ...b].some(v => v === null)) return false;
+  return Math.max(...a as number[]) < Math.min(...b as number[]);
 }

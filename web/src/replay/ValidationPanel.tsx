@@ -11,8 +11,8 @@ export function ValidationPanel({ data, initial }: { data: Dataset; initial?: Cr
     setResults({ duration: visitorCheck("duration", data.manifest.metrics, criteria.duration, data.trusted), xy: visitorCheck("xy", data.manifest.metrics, criteria.xy, data.trusted), yaw: visitorCheck("yaw", data.manifest.metrics, criteria.yaw, data.trusted) });
   }
   return <section className="result-card visitor" aria-labelledby="validation-title">
-    <div className="section-kicker">YOUR TESTS · ORIGINAL EVIDENCE STAYS UNCHANGED</div>
-    <h2 id="validation-title">Set your acceptance criteria</h2>
+    <div className="section-kicker visitor-kicker">YOUR CALCULATION · ORIGINAL EVIDENCE STAYS UNCHANGED</div>
+    <h3 id="validation-title">Set your acceptance criteria</h3>
     <form noValidate onSubmit={run}>
       <div className="validation-checks">{CHECKS.map(check => {
         const result = results?.[check.id];

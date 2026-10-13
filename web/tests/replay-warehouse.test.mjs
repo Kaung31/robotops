@@ -18,7 +18,9 @@ const engine = compile(await read('../src/replay/data.ts'), { './schema-v1.json'
 const loader = compile(await read('../src/replay/data-warehouse.ts'), { './data': engine, './schema-warehouse-v1.json': { default: schema } });
 const compare = compile(await read('../src/replay/comparison.ts'), { './data': engine });
 const wcompare = compile(await read('../src/replay/warehouse-comparison.ts'), { './comparison': compare, './data-warehouse': loader });
-const { WarehouseComparisonPanel } = compile(await read('../src/replay/WarehouseComparisonPanel.tsx'), { 'react/jsx-runtime': jsx, './comparison': compare, './data-warehouse': loader, './warehouse-comparison': wcompare });
+const strip = compile(await read('../src/site/StripChart.tsx'), { 'react/jsx-runtime': jsx });
+const { WarehouseResults, WarehouseComparison } = compile(await read('../src/replay/WarehouseComparisonPanel.tsx'), { 'react/jsx-runtime': jsx, './comparison': compare, './data-warehouse': loader, './warehouse-comparison': wcompare, '../site/StripChart': strip });
+const { BenchmarkCautions } = compile(await read('../src/site/BenchmarkCautions.tsx'), { 'react/jsx-runtime': jsx });
 const { WarehouseBanner } = compile(await read('../src/replay/WarehouseBanner.tsx'), { 'react/jsx-runtime': jsx, './data-warehouse': loader });
 const validation = compile(await read('../src/replay/validation.ts'), { './data': engine });
 const presentation = compile(await read('../src/replay/presentation.ts'));
@@ -51,13 +53,31 @@ test('per-configuration summaries use exact values of all three planned trials o
   assert.equal(wcompare.differenceOfMeans(wcompare.trialRows(partial), 'mission_ros_seconds'), null);
   assert.equal(wcompare.verdictCounts(wcompare.trialRows({}), 'smac_dwb', 'contact'), 'Unavailable');
 });
-test('comparison panel discloses W03 teardown and qualification without ranking', () => {
-  const html = renderToStaticMarkup(React.createElement(WarehouseComparisonPanel, { originals: fakes, error: '', selected: 'W03' }));
-  for (const text of ['Compare the six warehouse trials', 'Key finding — no aisle driving', 'does not demonstrate narrow-aisle navigation', 'not formally qualified', 'W3/W4', 'Simulator ground truth was not recorded', 'navigation succeeded and its evidence was finalized; Gazebo then crashed during post-run teardown', 'Crashed after evidence finalized', 'W03: the simulator crashed while the stack was shutting down', 'Descriptive only', 'no winner', 'Δ of means (Smac − NavFn)', 'NavFn + Regulated Pure Pursuit', 'Smac 2D + DWB']) assert(html.includes(text), text);
-  assert.match(html, /aria-current="true"/);
-  assert.doesNotMatch(html, /winner score:|superior|best profile|statistically significant/i);
-  const empty = renderToStaticMarkup(React.createElement(WarehouseComparisonPanel, { originals: {}, error: 'Unapproved', selected: null }));
-  assert.match(empty, /Comparison evidence unavailable/); assert.match(empty, /Unavailable until all six pinned manifests are verified/);
+test('results and comparison disclose W03 teardown and the aisle finding without ranking', () => {
+  const results = renderToStaticMarkup(React.createElement(WarehouseResults, { originals: fakes, error: '', selected: 'W03', onReplay: () => undefined }));
+  for (const text of ['Key finding — no aisle driving', 'does not demonstrate narrow-aisle navigation', 'Crashed after evidence finalized', 'W03: the simulator crashed while the stack was shutting down', 'All six trials, in run order', 'Replay W02 in the player', 'NavFn + Regulated Pure Pursuit', 'Smac 2D + DWB']) assert(results.includes(text), text);
+  assert.match(results, /aria-current="true"/); assert.match(results, />Showing</);
+  const comparison = renderToStaticMarkup(React.createElement(WarehouseComparison, { originals: fakes, error: '' }));
+  for (const text of ['Descriptive only', 'no winner', 'Δ of means (Smac − NavFn)', 'Per-configuration summary', 'Mission time, seconds', 'Final heading error, radians']) assert(comparison.includes(text), text);
+  for (const html of [results, comparison]) assert.doesNotMatch(html, /winner score:|superior|best profile|statistically significant/i);
+  const empty = renderToStaticMarkup(React.createElement(WarehouseResults, { originals: {}, error: 'Unapproved', selected: null }));
+  assert.match(empty, /Comparison evidence unavailable/); assert.doesNotMatch(empty, /finished every trial sooner/); assert.doesNotMatch(empty, /Replay W0/);
+  const emptyComparison = renderToStaticMarkup(React.createElement(WarehouseComparison, { originals: {}, error: 'Unapproved' }));
+  assert.match(emptyComparison, /Unavailable until all six pinned manifests are verified/); assert.match(emptyComparison, /Charts are unavailable/);
+});
+test('findings are stated only when every trial supports them', () => {
+  const rows = wcompare.trialRows(fakes);
+  assert.equal(wcompare.separated(rows, 'smac_dwb', 'navfn_rpp', 'mission_ros_seconds'), true);
+  assert.equal(wcompare.separated(rows, 'navfn_rpp', 'smac_dwb', 'mission_ros_seconds'), false);
+  const overlap = structuredClone(fakes); overlap.W02.metrics[0].value = 137.5;
+  assert.equal(wcompare.separated(wcompare.trialRows(overlap), 'smac_dwb', 'navfn_rpp', 'mission_ros_seconds'), false);
+  assert.doesNotMatch(renderToStaticMarkup(React.createElement(WarehouseResults, { originals: overlap, error: '', selected: null })), /finished every trial sooner/);
+  const missing = structuredClone(fakes); delete missing.W06;
+  assert.equal(wcompare.separated(wcompare.trialRows(missing), 'smac_dwb', 'navfn_rpp', 'mission_ros_seconds'), false);
+});
+test('shared benchmark cautions carry every required disclosure', () => {
+  const html = renderToStaticMarkup(React.createElement(BenchmarkCautions, { id: 'caution' }));
+  for (const text of ['never entered the 1.2 m aisles', 'does not show narrow-aisle navigation', 'Three trials per configuration', 'not statistical significance', 'planner and the controller both differ', 'Not formally qualified', 'W3/W4', 'normal backend campaigns', 'simulator ground truth was not recorded', 'W03 teardown crash', 'Navigation succeeded and the evidence was finalized, then Gazebo crashed while the stack shut down', 'results are unchanged']) assert(html.includes(text), text);
 });
 
 let available = process.env.ROBOTOPS_SKIP_PRIVATE !== '1';
@@ -94,8 +114,11 @@ if (available) {
     assert.equal(wcompare.profileSummary(rows, 'navfn_rpp', 'mission_ros_seconds').mean.toFixed(2), '137.67');
     assert.equal(wcompare.profileSummary(rows, 'smac_dwb', 'mission_ros_seconds').mean.toFixed(2), '132.78');
     assert.equal(wcompare.verdictCounts(rows, 'navfn_rpp', 'contact'), 'NO_CONTACT_OBSERVED 3/3');
-    const html = renderToStaticMarkup(React.createElement(WarehouseComparisonPanel, { originals, error: '', selected: 'W01' }));
-    assert.match(html, /137\.372 s/); assert.match(html, /matches/); assert.doesNotMatch(html, /differ — do not treat as controlled/);
+    const results = renderToStaticMarkup(React.createElement(WarehouseResults, { originals, error: '', selected: 'W01' }));
+    assert.match(results, /137\.372 s/); assert.match(results, />6\/6</); assert.match(results, />5\/5</);
+    assert.match(results, /4\.9 s \(3\.6%\) faster on average/); assert.match(results, /mean 3\.2° against 11\.0°/); assert.match(results, /Final position errors overlap/);
+    const comparison = renderToStaticMarkup(React.createElement(WarehouseComparison, { originals, error: '' }));
+    assert.match(comparison, /matches/); assert.doesNotMatch(comparison, /differ — do not treat as controlled/); assert.match(comparison, /Validation limit \(original policy\)/);
   });
   test('W03 view shows the disclosure; ReplayLab starts at mission start for full recordings', () => {
     const banner = renderToStaticMarkup(React.createElement(WarehouseBanner, { manifest: datasets.W03.manifest }));

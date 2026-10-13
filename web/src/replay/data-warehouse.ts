@@ -4,7 +4,7 @@ import { freeze, gunzip, parsePgm, readBounded, sha256, validate, type Dataset, 
 // Exact private Warehouse Benchmark v1 exports. A manifest is accepted only by
 // its pinned hash; chunk inventories are derived from the pinned sample counts.
 export const PROFILE_LABELS = { navfn_rpp: "NavFn + Regulated Pure Pursuit", smac_dwb: "Smac 2D + DWB" } as const;
-const PROFILE_SHORT = { navfn_rpp: "NavFn + RPP", smac_dwb: "Smac 2D + DWB" } as const;
+export const PROFILE_SHORT = { navfn_rpp: "NavFn + RPP", smac_dwb: "Smac 2D + DWB" } as const;
 export type Profile = keyof typeof PROFILE_LABELS;
 export const WAREHOUSE = {
   W01: { profile: "navfn_rpp", hash: "2c9007b91dd0d09c76d83e3f948303c678daf547a4b492860d6109d7106a7345", poses: 2357, scans: 707, trial: "7fcfc1078d3845e1ab9ce2a5cb68f238", run: "39fb7bf2ef7d4f5aa1e7561a2042dc6b" },
@@ -35,7 +35,7 @@ export interface WarehouseManifest extends Manifest {
   teardown: { status: "NO_CHILD_FAILURE_LOGGED" | "CRASHED_AFTER_EVIDENCE_FINALIZED"; detail: string | null; original_campaign_cleanup_confirmed: true; original_cleanup_check_included_exit_status: false; evidence_finalized_before_teardown: true };
   recorder_loss: { accounting_complete: true; transport_lost_messages: 0; loss_reports: 0 };
   original_report_limitations: string[];
-  original_validation: Manifest["original_validation"] & { action_status: number | null; action_status_reason: string; mission_action: { action_type: string; action_name: string; scope: string; owner: string; observer: string; quality: string; pointer: string; event_time_ns: null; recorded_action_stream: false } };
+  original_validation: Manifest["original_validation"] & { pose_policy: { xy_tolerance_m: number; yaw_tolerance_rad: number }; action_status: number | null; action_status_reason: string; mission_action:{ action_type: string; action_name: string; scope: string; owner: string; observer: string; quality: string; pointer: string; event_time_ns: null; recorded_action_stream: false } };
 }
 export interface WarehouseDataset extends Dataset { manifest: WarehouseManifest }
 export function assetNames(id: WarehouseId): string[] {
