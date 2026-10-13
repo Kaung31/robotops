@@ -25,7 +25,7 @@ const { WarehouseBanner } = compile(await read('../src/replay/WarehouseBanner.ts
 const validation = compile(await read('../src/replay/validation.ts'), { './data': engine });
 const presentation = compile(await read('../src/replay/presentation.ts'));
 const panel = compile(await read('../src/replay/ValidationPanel.tsx'), { react: React, 'react/jsx-runtime': jsx, './validation': validation });
-const { ReplayLab } = compile(await read('../src/replay/ReplayLab.tsx'), { react: React, 'react/jsx-runtime': jsx, './data': engine, './presentation': presentation, './ValidationPanel': panel, '../components/MapView': { MapView: () => React.createElement('div', null, 'map fixture') }, './RecordedScene': { RecordedScene: () => React.createElement('div', null, 'scene fixture') } });
+const { ReplayLab } = compile(await read('../src/replay/ReplayLab.tsx'), { react: React, 'react/jsx-runtime': jsx, './data': engine, './presentation': presentation, './ValidationPanel': panel, '../components/MapView': { MapView: () => React.createElement('div', null, 'map fixture') }, '../site/release': compile(await read('../src/site/release.ts')), './RecordedScene': { RecordedScene: () => React.createElement('div', null, 'scene fixture') } });
 
 test('warehouse schema matches the Python model artifact byte for byte', async () => {
   assert.equal(await read('../src/replay/schema-warehouse-v1.json'), await read('../../scripts/replay-schema-warehouse-v1.json'));

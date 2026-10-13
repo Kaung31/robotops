@@ -1,7 +1,9 @@
 # Recorded Lab datasets — licence recommendation
 
-Status: recommendation only. No licence has been assigned. Owner preference
-(2026-10-13): CC BY 4.0, not yet authorised for assignment.
+Status: CC BY 4.0 approved by the owner on 2026-10-13 and applied in the website
+launch build: `web/release-config/DATA-LICENSE.txt` and `RELEASE.json` (the eight
+pinned manifest hashes), `NOTICE` and the site footer. The datasets are published
+only when the owner deploys the site.
 This is an engineering summary, not legal advice.
 
 ## What would be licensed
@@ -47,11 +49,11 @@ more than credit.
 Suggested attribution: "RobotOps Recorded Lab datasets (Warehouse Navigation
 Benchmark v1), RobotOps Authors, 2026, CC BY 4.0".
 
-## Steps after a decision (not done)
+## Steps after the decision
 
-1. Add a dataset licence file next to the published bundles and update `NOTICE`.
-   Keep the licence outside the manifests: putting it inside would change every
-   pinned manifest hash and require a re-export.
+1. Done: dataset licence file and release record next to the published bundles,
+   `NOTICE` updated. The licence stays outside the manifests: putting it inside
+   would change every pinned manifest hash and require a re-export.
 2. Change `publication_review` only through a reviewed re-export, never by
    editing files.
 3. Publishing the datasets still needs explicit owner approval.

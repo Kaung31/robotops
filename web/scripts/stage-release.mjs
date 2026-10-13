@@ -48,8 +48,13 @@ export async function inspectBundle(root, id) {
 }
 export async function inspectSite(root) {
   const files = new Map();
-  const required = ['index.html','replay.html','404.html','_headers','_redirects','robots.txt','THIRD_PARTY_NOTICES.txt'];
+  const required = ['index.html','replay.html','404.html','_headers','_redirects','robots.txt','THIRD_PARTY_NOTICES.txt','DATA-LICENSE.txt','RELEASE.json'];
   for (const name of required) files.set(name, await regular(root, name));
+  // The licence and release record must cover exactly the pinned dataset manifests.
+  const release = JSON.parse(files.get('RELEASE.json'));
+  if (release.dataset_licence !== 'CC-BY-4.0' || JSON.stringify(Object.keys(release.datasets ?? {}).sort()) !== JSON.stringify(Object.keys(pins).map(id => id.toUpperCase()).sort()) || Object.entries(pins).some(([id, hash]) => release.datasets[id.toUpperCase()] !== hash)) throw Error('Release record does not match the pinned datasets');
+  const licence = files.get('DATA-LICENSE.txt').toString();
+  if (!licence.includes('CC BY 4.0') || /DRAFT|NOT APPLIED/.test(licence) || Object.values(pins).some(hash => !licence.includes(hash))) throw Error('Dataset licence does not cover the pinned datasets');
   if ((await readdir(root)).some(n => ![...required, 'assets'].includes(n))) throw Error('Unexpected site file');
   const assets = await readdir(resolve(root, 'assets'));
   if (!assets.length || assets.some(n => !/^[a-zA-Z0-9_-]+\.(js|css)$/.test(n))) throw Error('Unexpected compiled asset');
@@ -67,7 +72,9 @@ export function exposure(path) {
   if (path.startsWith('assets/')) return 'Compiled presentation/replay/validation code or styles, schema and dataset allowlist pins. No operational entry or recorded telemetry embedded.';
   if (path === 'THIRD_PARTY_NOTICES.txt') return 'Runtime dependency names, versions, MIT copyright and licence notices.';
   if (path.startsWith('_')) return 'Static host routing/security configuration only.';
-  return 'Portfolio/lab page shell, draft wording, owner-supplied GitHub link, error page or no-index robots directive.';
+  if (path === 'DATA-LICENSE.txt') return 'Owner-approved CC BY 4.0 licence for the eight pinned datasets, attribution text and the GitHub link.';
+  if (path === 'RELEASE.json') return 'Release record: CC BY 4.0, approval date, attribution and the eight pinned dataset manifest hashes.';
+  return 'Homepage/lab page shell, owner-supplied GitHub link, error page or no-index robots directive.';
 }
 export async function stage(output) {
   const web = resolve(dirname(fileURLToPath(import.meta.url)), '..'), repo = resolve(web, '..');

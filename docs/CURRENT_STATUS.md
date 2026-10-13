@@ -14,8 +14,8 @@ The full development log is kept locally in `docs/archive/` and is not published
   recovery), final-pose validation, Gazebo contact evidence, versioned reports.
 - React dashboard (live map, LiDAR, teleop, readiness, campaigns, reports) and a
   separate static Recorded Lab: the six warehouse benchmark trials (W01–W06) with
-  a six-trial comparison, plus two earlier baselines (N0, N2). Private release
-  candidate only; datasets are not published.
+  a six-trial comparison, plus two earlier baselines (N0, N2). Datasets licensed
+  CC BY 4.0 (owner approval 2026-10-13); launch build prepared, not yet published.
 - Opt-in native freshness diagnostics; an isolated LiDAR fault relay that is not
   yet wired into campaigns.
 

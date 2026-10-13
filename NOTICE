@@ -47,5 +47,9 @@ licence/compliance review, including LGPL obligations and header discrepancies.
 
 Recorded data
 -------------
-Recorded experiments, MCAP files and derived replay datasets are not part of
-this source release and are not covered by this license.
+The derived Recorded Lab replay datasets (Warehouse Navigation Benchmark v1
+W01-W06 and baselines N0/N2, as listed in the website's RELEASE.json) are
+licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/ . The
+licence text is web/release-config/DATA-LICENSE.txt. Raw MCAP recordings, logs,
+campaign databases and full reports are not published and are not licensed by
+this notice. The source code licence (Apache-2.0) does not cover the datasets.

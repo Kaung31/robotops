@@ -25,9 +25,9 @@ test('homepage explains RobotOps, features benchmark v1 with every disclosure, a
  const source=await read('../src/portfolio/Portfolio.tsx');
  const {Portfolio}=await load(new URL('../src/portfolio/Portfolio.tsx',import.meta.url));
  const html=renderToStaticMarkup(React.createElement(Portfolio));
- for(const value of ['Robotics,','evidence.','ROS 2 experimentation and evaluation platform','Explore the Recorded Lab','Warehouse Navigation Benchmark v1','137.67 s','132.78 s','3.2°','11.0°','6/6','5/5','4.9 s (3.6%) faster','Gazebo','Nav2','RViz','Foxglove','FastAPI','SQLite','Three.js','ros2_control','C++','https://github.com/Kaung31/robotops','Private release candidate · not published',
+ for(const value of ['Robotics,','evidence.','ROS 2 experimentation and evaluation platform','Explore the Recorded Lab','Warehouse Navigation Benchmark v1','137.67 s','132.78 s','3.2°','11.0°','6/6','5/5','4.9 s (3.6%) faster','Gazebo','Nav2','RViz','Foxglove','FastAPI','SQLite','Three.js','ros2_control','C++','https://github.com/Kaung31/robotops','datasets CC BY 4.0','href="/DATA-LICENSE.txt"',
   'never entered the 1.2 m aisles','Three trials per configuration','planner and the controller both differ','Not formally qualified','W3/W4','simulator ground truth was not recorded','W03 teardown crash','Not done yet','not implemented'])assert(html.includes(value),value);
- for(const banned of [/Draft/,/awaiting approval/i,/@gmail|mailto:/i,/superior(?!ity)/i,/statistically significant/i,/best (configuration|planner)/i,/winner/i])assert.doesNotMatch(html,banned);
+ for(const banned of [/Draft/,/awaiting approval/i,/not published|release candidate/i,/@gmail|mailto:/i,/superior(?!ity)/i,/statistically significant/i,/best (configuration|planner)/i,/winner/i])assert.doesNotMatch(html,banned);
  assert.equal((html.match(/<h1/g)||[]).length,1);assert.match(html,/<main id="main"/);assert.match(html,/href="\/replay.html"/);
  const levels=[...html.matchAll(/<h([1-6])/g)].map(m=>+m[1]);assert(levels.every((l,i)=>i===0||l<=levels[i-1]+1),`heading levels skip: ${levels}`);
  assert.doesNotMatch(source,/fetch\(|WebSocket\s*\(|useTelemetry|useControlCenter|from .*App/);
@@ -40,7 +40,7 @@ test('homepage route figure is the recorded W01 route and never enters an aisle'
 });
 test('site build is a separate code-only multipage entry with no proxy/public assets',async()=>{
  const source=await read('../vite.site.config.ts');assert.match(source,/publicDir: false/);assert.match(source,/portfolio.html/);assert.match(source,/replay.html/);assert.doesNotMatch(source,/proxy\s*:|index.html/);
- const finalize=await read('../scripts/finalize-site.mjs');assert.doesNotMatch(finalize,/artifacts\/|p4b-export/);assert.match(finalize,/robots.txt/);assert.match(finalize,/module-preload polyfill/);assert.match(finalize,/Licenses of bundled dependencies/);
+ const finalize=await read('../scripts/finalize-site.mjs');assert.doesNotMatch(finalize,/artifacts\/|p4b-export/);assert.match(finalize,/robots.txt/);assert.match(finalize,/module-preload polyfill/);assert.match(finalize,/Licenses of bundled dependencies/);assert.match(finalize,/'DATA-LICENSE.txt', 'RELEASE.json'\]\) await copyFile/);assert.doesNotMatch(finalize,/publication not approved/);
  assert.match(await read('../release-config/_headers'),/connect-src 'self'/);assert.equal(await read('../release-config/_redirects'),'/lab /replay.html 302\n/lab/ /replay.html 302\n');
 });
 test('stager forbids public/output reuse and unknown dataset, exposes inventory categories',async()=>{
@@ -52,7 +52,11 @@ test('site inspector fails closed on missing files and unintended artifacts',asy
  try {
   await assert.rejects(inspectSite(temp));
   for(const name of ['index.html','replay.html','404.html','_headers','_redirects','robots.txt','THIRD_PARTY_NOTICES.txt'])await writeFile(join(temp,name),'shell');
-  await mkdir(join(temp,'assets'));await writeFile(join(temp,'assets','site.js'),'static code');assert.equal((await inspectSite(temp)).size,8);
+  for(const name of ['DATA-LICENSE.txt','RELEASE.json'])await cp(new URL(`../release-config/${name}`,import.meta.url),join(temp,name));
+  await mkdir(join(temp,'assets'));await writeFile(join(temp,'assets','site.js'),'static code');assert.equal((await inspectSite(temp)).size,10);
+  const release=JSON.parse(await readFile(join(temp,'RELEASE.json'),'utf8'));release.datasets.W03='0'.repeat(64);await writeFile(join(temp,'RELEASE.json'),JSON.stringify(release));await assert.rejects(inspectSite(temp),/Release record/);
+  await cp(new URL('../release-config/RELEASE.json',import.meta.url),join(temp,'RELEASE.json'));await writeFile(join(temp,'DATA-LICENSE.txt'),'DRAFT CC BY 4.0');await assert.rejects(inspectSite(temp),/Dataset licence/);
+  await cp(new URL('../release-config/DATA-LICENSE.txt',import.meta.url),join(temp,'DATA-LICENSE.txt'));
   await writeFile(join(temp,'private.mcap'),'private');await assert.rejects(inspectSite(temp),/Unexpected site/);await rm(join(temp,'private.mcap'));
   await writeFile(join(temp,'assets','site.js'),'new WebSocket("control")');await assert.rejects(inspectSite(temp),/Operational/);
  }finally{await rm(temp,{recursive:true,force:true});}
@@ -106,4 +110,12 @@ test('homepage route and headline values re-derive from the pinned warehouse dat
  const nav=stats('navfn_rpp'),smac=stats('smac_dwb');
  assert.equal((nav.seconds-smac.seconds).toFixed(1),b.HEADLINE.faster.toFixed(1));assert.equal(((nav.seconds-smac.seconds)/nav.seconds*100).toFixed(1),b.HEADLINE.fasterPercent.toFixed(1));
  assert(smac.max<nav.min,'every Smac 2D + DWB trial finished sooner');
+});
+test('approved CC BY 4.0 licence and release record cover exactly the eight pinned datasets',async()=>{
+ const licence=await read('../release-config/DATA-LICENSE.txt'),release=JSON.parse(await read('../release-config/RELEASE.json'));
+ assert.match(licence,/Creative Commons\nAttribution 4\.0 International licence \(CC BY 4\.0\)/);assert.match(licence,/https:\/\/creativecommons\.org\/licenses\/by\/4\.0\/legalcode/);assert.doesNotMatch(licence,/DRAFT|NOT APPLIED/);
+ for(const hash of Object.values(pins))assert(licence.includes(hash),hash);
+ assert.equal(release.dataset_licence,'CC-BY-4.0');assert.equal(release.licence_approved_on,'2026-10-13');
+ assert.deepEqual(Object.fromEntries(Object.entries(release.datasets).map(([k,v])=>[k.toLowerCase(),v])),{...pins});
+ assert.doesNotMatch(licence+JSON.stringify(release),/@gmail|\/home\/|password|token/i);
 });
