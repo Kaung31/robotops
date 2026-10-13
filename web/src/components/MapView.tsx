@@ -296,7 +296,7 @@ export function MapView({ snapshot, selectedGoal, onGoalSelect, trajectory = [],
       <canvas
         ref={ref}
         className="map-canvas interactive"
-        aria-label="Interactive robot occupancy map"
+        aria-label={readOnly ? "Recorded occupancy map with robot trajectory" : "Interactive robot occupancy map"}
         onPointerDown={pointerDown}
         onPointerMove={pointerMove}
         onPointerUp={pointerUp}
@@ -304,9 +304,9 @@ export function MapView({ snapshot, selectedGoal, onGoalSelect, trajectory = [],
         onWheel={wheel}
       />
       <div className="map-toolbar" aria-label="Map controls">
-        <button className="map-tool" onClick={() => setViewport((v) => ({ ...v, zoom: Math.min(MAX_ZOOM, v.zoom * 1.25) }))}>+</button>
-        <button className="map-tool" onClick={() => setViewport((v) => ({ ...v, zoom: Math.max(MIN_ZOOM, v.zoom / 1.25) }))}>−</button>
-        <button className="map-tool fit" onClick={() => setViewport({ zoom: 1, panX: 0, panY: 0 })}>Fit</button>
+        <button className="map-tool" aria-label="Zoom in" onClick={() => setViewport((v) => ({ ...v, zoom: Math.min(MAX_ZOOM, v.zoom * 1.25) }))}>+</button>
+        <button className="map-tool" aria-label="Zoom out" onClick={() => setViewport((v) => ({ ...v, zoom: Math.max(MIN_ZOOM, v.zoom / 1.25) }))}>−</button>
+        <button className="map-tool fit" aria-label="Fit map to view" onClick={() => setViewport({ zoom: 1, panX: 0, panY: 0 })}>Fit</button>
       </div>
       <div className="map-legend">
         <span><i className="legend robot" />robot</span>

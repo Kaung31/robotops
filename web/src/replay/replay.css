@@ -198,9 +198,12 @@ body { min-width: 0; margin: 0; background: #0b141e; color: #e3edf5; font-family
 /* Warehouse benchmark v1: context banner, disclosure and six-trial comparison. */
 .benchmark-note { border: 1px solid #2d4557; border-radius: 8px; background: #132636; padding: 10px 14px; margin: 0 0 12px; font-size: 12px; color: #c6dae6; }
 .benchmark-note p { margin: 0; }
-.benchmark-note .teardown-disclosure { margin-top: 8px; color: #f0d29a; }
+.benchmark-note .teardown-disclosure { color: #f0d29a; }
 .comparison-table tr.selected-trial th, .comparison-table tr.selected-trial td { background: #1b3346; }
 .comparison-table.warehouse-trials { font-size: 11px; }
 .comparison-panel h3 + .comparison-table { margin-top: 4px; }
 .replay-lab .key-finding { border-left: 3px solid #f0d29a; background: #1d2a33; padding: 8px 12px; margin: 0 0 14px; font-size: 12px; color: #e6dcc4; }
-.benchmark-note .route-note { margin-top: 6px; color: #c6dae6; }
+.benchmark-note .route-note { color: #c6dae6; }
+.benchmark-disclosures { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.benchmark-disclosures li { line-height: 1.45; }
+.comparison-disclosures { font-size: 12px; color: #c6dae6; margin: 0 0 14px; }

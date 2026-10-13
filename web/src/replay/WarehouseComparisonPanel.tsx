@@ -13,7 +13,12 @@ export function WarehouseComparisonPanel({ originals, error, selected }: { origi
   const crashed = rows.filter(r => r.teardown === "CRASHED_AFTER_EVIDENCE_FINALIZED").map(r => r.id);
   return <section className="comparison-panel result-card" aria-labelledby="warehouse-comparison-title">
     <div className="comparison-heading"><div><div className="section-kicker">ORIGINAL EVIDENCE · NO PROFILE RANKING</div><h2 id="warehouse-comparison-title">Compare the six warehouse trials</h2></div><span className="comparison-badge">W01–W06 · 2 configurations × 3</span></div>
-    <p className="comparison-subtitle">Warehouse Navigation Benchmark v1 · exploratory · ran through the normal backend campaign path · not qualified.</p>
+    <p className="comparison-subtitle">Warehouse Navigation Benchmark v1 · exploratory · ran through the normal backend campaign path · not formally qualified.</p>
+    <ul className="benchmark-disclosures comparison-disclosures" aria-label="Read these results with care">
+      <li>Exploratory: three trials per configuration in one simulated world and start. Not formally qualified — the earlier W3/W4 qualification process was not completed.</li>
+      <li>Simulator ground truth was not recorded for these six runs: final position and yaw errors compare the robot's own localization with the goal.</li>
+      <li>W03: navigation succeeded and its evidence was finalized; Gazebo then crashed during post-run teardown. Its results are unchanged.</li>
+    </ul>
     <p className="key-finding"><strong>Key finding — no aisle driving:</strong> the goals sit at both ends of the two 1.2 m aisles between the racks, but in all six trials both configurations drove around the rack block on the perimeter and never entered an aisle. This benchmark does not demonstrate narrow-aisle navigation.</p>
     {error && <p role="alert">Comparison evidence unavailable: {error}. No estimated values or stale fallback.</p>}
     <table className="comparison-table warehouse-trials"><caption className="sr-only">Original source measurements and verdicts for each trial, in run order.</caption><thead><tr><th scope="col">Trial</th><th scope="col">Configuration</th>{COMPARABLE.map(c => <th scope="col" key={c.name}>{c.label}</th>)}<th scope="col">Pose verification</th><th scope="col">Scoped contact</th><th scope="col">Stack teardown</th></tr></thead><tbody>

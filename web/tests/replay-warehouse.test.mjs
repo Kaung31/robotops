@@ -53,7 +53,7 @@ test('per-configuration summaries use exact values of all three planned trials o
 });
 test('comparison panel discloses W03 teardown and qualification without ranking', () => {
   const html = renderToStaticMarkup(React.createElement(WarehouseComparisonPanel, { originals: fakes, error: '', selected: 'W03' }));
-  for (const text of ['Compare the six warehouse trials', 'Key finding — no aisle driving', 'does not demonstrate narrow-aisle navigation', 'not qualified', 'Crashed after evidence finalized', 'W03: the simulator crashed while the stack was shutting down', 'Descriptive only', 'no winner', 'Δ of means (Smac − NavFn)', 'NavFn + Regulated Pure Pursuit', 'Smac 2D + DWB']) assert(html.includes(text), text);
+  for (const text of ['Compare the six warehouse trials', 'Key finding — no aisle driving', 'does not demonstrate narrow-aisle navigation', 'not formally qualified', 'W3/W4', 'Simulator ground truth was not recorded', 'navigation succeeded and its evidence was finalized; Gazebo then crashed during post-run teardown', 'Crashed after evidence finalized', 'W03: the simulator crashed while the stack was shutting down', 'Descriptive only', 'no winner', 'Δ of means (Smac − NavFn)', 'NavFn + Regulated Pure Pursuit', 'Smac 2D + DWB']) assert(html.includes(text), text);
   assert.match(html, /aria-current="true"/);
   assert.doesNotMatch(html, /winner score:|superior|best profile|statistically significant/i);
   const empty = renderToStaticMarkup(React.createElement(WarehouseComparisonPanel, { originals: {}, error: 'Unapproved', selected: null }));
@@ -99,7 +99,8 @@ if (available) {
   });
   test('W03 view shows the disclosure; ReplayLab starts at mission start for full recordings', () => {
     const banner = renderToStaticMarkup(React.createElement(WarehouseBanner, { manifest: datasets.W03.manifest }));
-    assert.match(banner, /Disclosure:/); assert.match(banner, /gazebo_runner exited -11/); assert.match(banner, /not qualified/); assert.match(banner, /never enters the 1.2 m aisles/);
+    assert.match(banner, /Disclosure:/); assert.match(banner, /gazebo_runner exited -11/); assert.match(banner, /Not formally qualified/); assert.match(banner, /W3\/W4/); assert.match(banner, /never entered the 1.2 m aisles/);
+    assert.match(banner, /three trials per configuration/); assert.match(banner, /Simulator ground truth was not recorded/); assert.match(banner, /navigation succeeded and the evidence was finalized; Gazebo then crashed during post-run teardown/);
     assert.doesNotMatch(renderToStaticMarkup(React.createElement(WarehouseBanner, { manifest: datasets.W01.manifest })), /Disclosure:/);
     const html = renderToStaticMarkup(React.createElement(ReplayLab, { data: datasets.W03, manifestHash: loader.WAREHOUSE.W03.hash, criteria: { duration: '140', xy: '0.2', yaw: '0.25' } }));
     assert.match(html, /Whole navigation window recorded/); assert.match(html, /00:00\.0/); assert.match(html, /Playback starts at mission start/);
@@ -118,3 +119,16 @@ if (available) {
     }
   });
 }
+
+test('after the last display sample inside the recording, the pose status says how far back it is', () => {
+  // Synthetic UI fixture: one supported sample 15 ms before mission start, recording continues.
+  const transform = { position: [0, 0, 0], quaternion: [0, 0, 0, 1] };
+  const data = { trusted: true, pixels: new Uint8Array([255]), scans: [], poses: [{ ros_ns: '985000000', offset_us: 0, segment_id: 's', frame: 'map', transform, quality: 'SUPPORTED_TF' }],
+    manifest: { schema_version: 3, dataset_id: 'W01', time: { mission_start_ns: '1000000000', mission_end_ns: '2000000000', recorded_start_ns: '985000000', recorded_end_ns: '2000000000', offset_origin_ns: '985000000' },
+      segments: [{ id: 's', start_ros_ns: '985000000', end_ros_ns: '985000000', interpolate_within_max_gap_ns: 100000000, epoch: 0, frame: 'map' }],
+      scene: { width: 1, height: 1, resolution_m: .05, origin: [0, 0, 0], free_threshold: .196, occupied_threshold: .65, negate: 0 }, metrics: [], coverage: { full_mission_replay: true, gaps: [], missing_channels: [] },
+      original_validation: { ros_outcome: 'succeeded', pose_verdict: 'POSE_VERIFIED', contact_verdict: 'NO_CONTACT_OBSERVED', final_localized_pose: { x: 0, y: 0, yaw: 0 }, final_pose_ros_ns: '2000000000', contact_frame_count: 1, contact_scope: 'ADAPTER_MONITORED_GEOMETRY_ONLY', action_status: 4, action_status_reason: 'AVAILABLE', mission_action: { pointer: '/campaign/trials/0/evidence/validation/action_status', scope: 'SAVED_MISSION_ACTION_RESULT_SNAPSHOT', observer: 'experiment_runner' } },
+      teardown: { status: 'NO_CHILD_FAILURE_LOGGED' }, recorder_loss: { transport_lost_messages: 0 }, limitations: [] } };
+  const html = renderToStaticMarkup(React.createElement(ReplayLab, { data }));
+  assert.match(html, /Pose unavailable — last 20 Hz display sample is 0\.015 s earlier; no movement reconstructed/);
+});

@@ -6,7 +6,7 @@ import type { MapSnapshot, RobotSnapshot } from "../lib/types";
 import { ValidationPanel, type Criteria } from "./ValidationPanel";
 import { RecordedScene } from "./RecordedScene";
 import { advance, occupancyRows, poseAt, scanAt, scanPoints, secondsBetween, N0_HASH, type Dataset, type Transform } from "./data";
-import { initialPreviewTime, formatTime, coverageBands } from "./presentation";
+import { initialPreviewTime, formatTime, coverageBands, frameClock } from "./presentation";
 function planar(tf: Transform) {
   const [x, y, z, w] = tf.quaternion;
   return { x: tf.position[0], y: tf.position[1], yaw: Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)) };
@@ -23,13 +23,18 @@ export function ReplayLab({ data, navigation, selector, comparison, banner, mani
   const [time, setTime] = useState(() => full ? 0 : initialPreviewTime(data)), [playing, setPlaying] = useState(false), [speed, setSpeed] = useState(1);
   useEffect(() => {
     if (!playing) return;
-    let previous = performance.now(), frame = 0;
-    const tick = (now: number) => { setTime(t => advance(t, (now - previous) / 1000, true, speed, duration)); previous = now; frame = requestAnimationFrame(tick); };
+    const elapsedSince = frameClock(performance.now());
+    let frame = 0;
+    const tick = (now: number) => { const elapsed = elapsedSince(now); setTime(t => advance(t, elapsed, true, speed, duration)); frame = requestAnimationFrame(tick); };
     frame = requestAnimationFrame(tick); return () => cancelAnimationFrame(frame);
   }, [playing, speed, duration]);
   useEffect(() => { if (time >= duration) setPlaying(false); }, [time, duration]);
   const stamp = BigInt(m.time.mission_start_ns) + BigInt(Math.round(time * 1e9));
   const pose = poseAt(data, stamp), scan = scanAt(data, stamp), points = scanPoints(scan);
+  // After the last 20 Hz display sample but still inside the recording: say how far
+  // back the last sample is instead of implying the recording itself has a gap.
+  const lastSupported = useMemo(() => [...data.poses].reverse().find(p => p.transform && p.quality === "SUPPORTED_TF"), [data]);
+  const displayTail = !pose && lastSupported && stamp > BigInt(lastSupported.ros_ns) && stamp <= BigInt(m.time.recorded_end_ns) ? secondsBetween(lastSupported.ros_ns, stamp.toString()) : null;
   const segment = data.poses.find(p => p.transform && BigInt(p.ros_ns) <= stamp)?.segment_id;
   const trail = data.poses.filter(p => p.transform && p.segment_id === segment && BigInt(p.ros_ns) <= stamp);
   const map = useMemo<MapSnapshot>(() => ({ frame_id: "map", width: m.scene.width, height: m.scene.height, resolution: m.scene.resolution_m,
@@ -55,7 +60,7 @@ export function ReplayLab({ data, navigation, selector, comparison, banner, mani
     <header className="lab-header"><div className="lab-title"><span className="lab-icon" aria-hidden="true">R</span><div><h1>RobotOps <span>/ Recorded Lab</span></h1><p>Replay a genuine robot experiment and test its results</p></div></div><div className="header-meta"><span className="recorded-badge">Recorded · Read-only · {m.dataset_id ?? "N0"}</span><span>Private local preview · not for publication</span></div></header>
     {selector}
     {banner}
-    <div className="coverage-note"><span><i aria-hidden="true">◧</i> {full ? "Whole navigation window recorded — reliable pose throughout the mission." : "Partial recording — some moments have no reliable pose."}</span><button className="text-button" onClick={openCoverage}>Coverage details ↗</button></div>
+    <div className="coverage-note"><span><i aria-hidden="true">◧</i> {full ? "Whole navigation window recorded — reliable pose at every 20 Hz display sample of the mission." : "Partial recording — some moments have no reliable pose."}</span><button className="text-button" onClick={openCoverage}>Coverage details ↗</button></div>
     <section className="metric-strip" aria-label="Original reported metrics"><div className="metric-tile"><span>Mission</span><strong>{durationMetric?.toFixed(2) ?? "Unknown"} <small>s</small></strong></div><div className="metric-tile"><span>Distance · odometry</span><strong>{distance?.toFixed(2) ?? "Unknown"} <small>m</small></strong></div><div className="metric-tile"><span>Final position error</span><strong>{xy == null ? "Unknown" : (xy * 100).toFixed(1)} <small>cm</small></strong></div><div className="metric-tile"><span>Navigation · original ROS result</span><strong className="navigation-result">{m.original_validation.ros_outcome === "succeeded" ? "Succeeded" : m.original_validation.ros_outcome}</strong></div></section>
     <section className="player" aria-label="Recorded mission player"><div className="player-toolbar"><div className="player-actions"><button className="play-button" onClick={() => { if (time >= duration) setTime(0); setPlaying(!playing); }}><span aria-hidden="true">{playing ? "Ⅱ" : "▶"}</span> {playing ? "Pause" : "Play"}</button><button onClick={() => { setTime(0); setPlaying(false); }}>↺ Restart</button><label className="speed-control"><span className="sr-only">Playback speed</span><select aria-label="Playback speed" value={speed} onChange={e => setSpeed(Number(e.target.value))}>{[.25, .5, 1, 2, 4].map(v => <option key={v} value={v}>{v}×</option>)}</select></label></div><output className="player-clock" aria-live="off">{formatTime(time)} <span>/ {formatTime(duration)}</span></output></div>
     <p className="preview-explanation">{full ? `Playback starts at mission start. Recording began ${secondsBetween(m.time.recorded_start_ns, m.time.mission_start_ns).toFixed(1)} s earlier, before dispatch; result finalization after navigation is not recorded.` : "Preview starts at a recorded moment with a reliable pose; the mission beginning is missing. Restart shows the original start."}</p>
@@ -63,7 +68,7 @@ export function ReplayLab({ data, navigation, selector, comparison, banner, mani
     <div className="timeline-legend"><span><i className="pose" />Supported pose</span><span><i className="recorded" />Recorded, no display pose</span><span><i className="missing" />Unrecorded</span><span className="original-label">Original reported metrics above · mission time</span></div>
     </section>
     <section className="workspace" aria-label="Synchronized recorded visualizations"><div className="view-tabs" role="tablist" aria-label="Recorded visualization"><button id="tab-map" role="tab" aria-selected={view === "map"} aria-controls="panel-map" tabIndex={view === "map" ? 0 : -1} onKeyDown={tabKey} onClick={() => setView("map")}>2D navigation map</button><button id="tab-scene" role="tab" aria-selected={view === "scene"} aria-controls="panel-scene" tabIndex={view === "scene" ? 0 : -1} onKeyDown={tabKey} onClick={() => setView("scene")}>Schematic 3D</button></div>
-    <section id="panel-map" className={`visual-panel map-panel ${view === "map" ? "selected" : ""}`} aria-labelledby="map-title"><div className="panel-heading"><h2 id="map-title">2D navigation map</h2><span>Occupancy · localized TF</span></div><div className={`visual-status ${pose ? "" : "unavailable"}`} role="status" data-testid="pose-status">{pose ? "Pose available · recorded localized TF" : "Pose unavailable — no movement reconstructed"}</div><MapView snapshot={snapshot} selectedGoal={null} onGoalSelect={() => undefined} trajectory={trail.map(p => planar(p.transform!))} mappingActive readOnly recordedScan={points.map(p => ({ x: p[0], y: p[1] }))} /></section>
+    <section id="panel-map" className={`visual-panel map-panel ${view === "map" ? "selected" : ""}`} aria-labelledby="map-title"><div className="panel-heading"><h2 id="map-title">2D navigation map</h2><span>Occupancy · localized TF</span></div><div className={`visual-status ${pose ? "" : "unavailable"}`} role="status" data-testid="pose-status">{pose ? "Pose available · recorded localized TF" : displayTail !== null ? `Pose unavailable — last 20 Hz display sample is ${displayTail.toFixed(3)} s earlier; no movement reconstructed` : "Pose unavailable — no movement reconstructed"}</div><MapView snapshot={snapshot} selectedGoal={null} onGoalSelect={() => undefined} trajectory={trail.map(p => planar(p.transform!))} mappingActive readOnly recordedScan={points.map(p => ({ x: p[0], y: p[1] }))} /></section>
     <section id="panel-scene" className={`visual-panel scene-panel ${view === "scene" ? "selected" : ""}`} aria-labelledby="scene-title"><div className="panel-heading"><h2 id="scene-title">Schematic 3D</h2><span>Recorded observations</span></div><div className={`visual-status ${pose ? "" : "unavailable"}`}>{pose ? "Schematic robot · not exact CAD or physical truth" : "Pose unavailable — robot hidden"}</div><RecordedScene pose={pose} points={points} trail={trail.map(p => p.transform!.position)} /></section>
     </section>
     <div className={`sensor-status ${scan ? "" : "unavailable"}`}>{scan ? `LiDAR available · ${points.length} supported rays · scan age ${secondsBetween(scan.ros_ns, stamp.toString()).toFixed(3)} s` : "LiDAR unavailable — missing TF, recording coverage, or scan older than 0.200 s"}<span>Views share the same mission cursor. Scans stay at their recorded transforms.</span></div>

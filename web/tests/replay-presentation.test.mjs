@@ -58,3 +58,16 @@ test('three fixed-unit criteria and explicit Run checks follow the visual worksp
   assert(html.indexOf('class="workspace"')<html.indexOf('id="validation-title"'));
   assert.match(html,/Preview starts at a recorded moment with a reliable pose/);
 });
+
+test('playback elapsed time survives deferred state updaters (real-time 1× speed)', () => {
+  // React may run a functional updater after later frames; emulate that worst case.
+  const clock = presentation.frameClock(1000), queued = [];
+  for (let now = 1016; now <= 4000; now += 16) { const elapsed = clock(now); queued.push(t => t + elapsed); }
+  const t = queued.reduce((value, update) => update(value), 0);
+  assert(Math.abs(t - 2.992) < 1e-9, `advanced ${t} s for 2.992 s of frames`);
+  assert.equal(presentation.frameClock(5)(4), 0); // never negative
+  // The previous pattern read a shared timestamp inside the updater: deferred evaluation lost time.
+  let previous = 1000; const broken = [];
+  for (let now = 1016; now <= 4000; now += 16) { broken.push(t => t + (now - previous) / 1000); previous = now; }
+  assert(broken.reduce((value, update) => update(value), 0) < 0.1);
+});
