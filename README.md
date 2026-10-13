@@ -18,6 +18,13 @@ recovery, final-pose validation, Gazebo contact evidence, versioned reports, a
 React/Three.js dashboard and a separate static Recorded Lab.
 See [current status](docs/CURRENT_STATUS.md).
 
+**Latest result:** [warehouse benchmark v1](docs/WAREHOUSE_BENCHMARK.md) (exploratory).
+Both Nav2 configurations completed a 28 m, five-goal warehouse mission 3/3 times
+with verified final pose and no observed contact. Smac 2D + DWB was ~3.6% faster;
+NavFn + RPP finished with a much tighter heading (≈3° vs ≈11°). **Neither entered
+the 1.2 m aisles between the racks; both drove around the rack block, so v1 shows
+no narrow-aisle navigation capability.**
+
 - [Architecture](docs/ARCHITECTURE.md) and [documentation index](docs/README.md)
 - [Mapping](docs/MAPPING.md), [navigation](docs/NAVIGATION.md),
   [missions](docs/MISSIONS.md), [experiments](docs/EXPERIMENTS.md)

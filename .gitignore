@@ -39,3 +39,6 @@ private-release/
 .wrangler/
 .dev.vars
 candidate-data/
+
+# Isolated CI validation outputs
+.ci-results/

@@ -2,9 +2,9 @@ import { useState, type FormEvent } from "react";
 import type { Dataset } from "./data";
 import { CHECKS, visitorCheck, type CheckId, type CheckResult } from "./validation";
 
-type Criteria = Record<CheckId, string>;
-export function ValidationPanel({ data }: { data: Dataset }) {
-  const [criteria, setCriteria] = useState<Criteria>({ duration: "25", xy: "0.2", yaw: "0.1" });
+export type Criteria = Record<CheckId, string>;
+export function ValidationPanel({ data, initial }: { data: Dataset; initial?: Criteria }) {
+  const [criteria, setCriteria] = useState<Criteria>(initial ?? { duration: "25", xy: "0.2", yaw: "0.1" });
   const [results, setResults] = useState<Record<CheckId, CheckResult> | null>(null);
   function run(event: FormEvent) {
     event.preventDefault();

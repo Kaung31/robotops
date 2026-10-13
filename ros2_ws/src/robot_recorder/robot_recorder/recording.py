@@ -1,5 +1,6 @@
 """Own a rosbag2 recorder process and validate its finalized MCAP artifacts."""
 
+import json
 import re
 import signal
 import subprocess
@@ -8,6 +9,27 @@ from pathlib import Path
 import yaml
 
 TOPIC = re.compile(r"^/?[A-Za-z_][A-Za-z0-9_]*(/[A-Za-z_][A-Za-z0-9_]*)*$")
+TRANSPORT_LOSS = re.compile(r"Number of messages lost on the transport layer: (\d+)")
+# rosbag2 reports lost messages from its event publisher thread. Silence means zero
+# loss only if that thread ran and the recorder reached its normal stop.
+ACCOUNTING_MARKERS = (
+    "Event publisher thread: Started",
+    "Recording stopped",
+    "Event publisher thread: Exited",
+)
+
+
+def loss_accounting(log_text: str) -> dict:
+    """Explicit transport-loss accounting from a rosbag2 recorder log."""
+    reported = [int(n) for n in TRANSPORT_LOSS.findall(log_text)]
+    markers = {marker: marker in log_text for marker in ACCOUNTING_MARKERS}
+    return dict(
+        source="rosbag2 recorder log",
+        transport_lost_messages=sum(reported),
+        loss_reports=len(reported),
+        markers=markers,
+        accounting_complete=all(markers.values()),
+    )
 
 
 def load_recording_config(path: Path) -> dict:
@@ -77,6 +99,10 @@ def inspect_bag(directory: Path, required: list[str]) -> dict:
 
 class Recorder:
     def __init__(self, directory: Path, run_id: str, config: dict, use_sim_time: bool):
+        # rosbag2 creates telemetry/ when its storage opens. Anything already there
+        # could be mistaken for opened storage by startup_status, so never reuse it.
+        if (directory / "telemetry").exists() or (directory / "telemetry").is_symlink():
+            raise RuntimeError("Recording output already exists; refusing to reuse it")
         self.directory = directory
         self.config = config
         self.name = f"recorder_{run_id}"
@@ -128,11 +154,14 @@ class Recorder:
             causes.append("recorder.writer_not_started")
         if self.use_sim_time and "Sim time /clock found, starting recording." not in text:
             causes.append("recorder.clock_not_received")
+        # The MCAP plugin creates the file when storage opens, but its header stays
+        # buffered until the first chunk (~768 KiB) is written, which low-rate
+        # recordings may not reach during startup. Bytes on disk must be MCAP.
         files = list((self.directory / "telemetry").glob("*.mcap"))
         opened = False
         for path in files:
             with path.open("rb") as stream:
-                opened |= stream.read(8) == b"\x89MCAP0\r\n"
+                opened |= stream.read(8) in (b"", b"\x89MCAP0\r\n")
         if not opened:
             causes.append("recorder.storage_not_open")
         required = list(self.config.get("startup_topics", self.config["required_topics"]))
@@ -142,12 +171,18 @@ class Recorder:
             subs = [e for e in subscriptions(topic) if e.node_name == self.name]
             pubs = publishers(topic)
             flags = []
-            if len(subs) != 1:
+            # Jazzy's sim-time recorder owns a TimeSource /clock reader in
+            # addition to its recorded-topic reader. Both must be present and
+            # compatible; a lone clock reader cannot prove recording capability.
+            records_clock = topic == "/clock" and topic in self.config["topics"]
+            expected_subscriptions = 1 + int(self.use_sim_time and records_clock)
+            if len(subs) != expected_subscriptions:
                 flags.append("subscription_missing_or_ambiguous")
+            if records_clock and "Subscribed to topic '/clock'" not in text:
+                flags.append("recording_subscription_not_acknowledged")
             if not pubs:
                 flags.append("publisher_missing")
-            if len(subs) == 1 and pubs:
-                sub = subs[0]
+            for sub in subs if pubs else []:
                 if any(p.topic_type != sub.topic_type for p in pubs):
                     flags.append("type_mismatch")
                 if any(not compatible(p.qos_profile, sub.qos_profile) for p in pubs):
@@ -173,6 +208,7 @@ class Recorder:
             topics[topic] = dict(
                 publishers=len(pubs),
                 recorder_subscriptions=len(subs),
+                expected_subscriptions=expected_subscriptions,
                 causes=flags,
                 offered=[describe(e) for e in pubs],
                 requested=[describe(e) for e in subs],
@@ -207,11 +243,19 @@ class Recorder:
                     f"Recorder failed: early_exit={early_exit}, forced={forced}, "
                     f"exit={self.process.returncode}; see recorder.log"
                 )
-            losses = re.findall(
-                r"Number of messages lost on the transport layer: (\d+)",
-                (self.directory / "recorder.log").read_text(),
+            self.log.flush()
+            accounting = loss_accounting((self.directory / "recorder.log").read_text())
+            # Kept beside the run, not in the recording summary that validators
+            # compare with an independent re-inspection of the bag.
+            (self.directory / "message_loss.json").write_text(
+                json.dumps(accounting, indent=2, sort_keys=True) + "\n"
             )
-            if any(int(n) > 0 for n in losses):
+            if not accounting["accounting_complete"]:
+                raise RuntimeError(
+                    "Recorder loss accounting incomplete; loss cannot be excluded: "
+                    f"{accounting['markers']}"
+                )
+            if accounting["transport_lost_messages"] > 0:
                 raise RuntimeError(
                     "Recorder transport loss; required-topic loss cannot be excluded"
                 )

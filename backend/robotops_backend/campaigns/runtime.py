@@ -52,6 +52,7 @@ class SimulationTrialRuntime:
         self.gateway = gateway
         self.root = root
         self.telemetry = telemetry
+        self._trial_directory: Path | None = None
 
     def supports(self, mode: str) -> bool:
         return mode == RuntimeMode.SIM and self.gateway.mode == RuntimeMode.SIM
@@ -62,6 +63,7 @@ class SimulationTrialRuntime:
     async def prepare(
         self, definition: CampaignDefinition, profile: str, canceled: CancelCheck
     ) -> None:
+        self._trial_directory = None
         self.gateway.reset_navigation_readiness()
         await asyncio.to_thread(
             self.orchestrator.start,
@@ -115,6 +117,12 @@ class SimulationTrialRuntime:
     async def stop(self) -> bool:
         status = await asyncio.to_thread(self.orchestrator.stop)
         self.gateway.reset_navigation_readiness()
+        if status.shutdown is not None and self._trial_directory is not None:
+            (self._trial_directory / "shutdown.json").write_text(
+                status.shutdown.model_dump_json(indent=2) + "\n"
+            )
+        # The report persists until the next stack start, so a retry cannot hide a crash.
+        exited_cleanly = status.shutdown is None or status.shutdown.clean
         # Match the existing restart quiet period; no new trial can overlap teardown.
         await asyncio.sleep(1.7)
         deadline = time.monotonic() + 5
@@ -122,7 +130,7 @@ class SimulationTrialRuntime:
             if time.monotonic() >= deadline:
                 return False  # An orphan or external publisher still owns live state.
             await asyncio.sleep(0.2)
-        return status.state == StackState.STOPPED and not status.processes
+        return status.state == StackState.STOPPED and not status.processes and exited_cleanly
 
     async def execute(
         self,
@@ -135,6 +143,11 @@ class SimulationTrialRuntime:
         lease_fd: int,
     ) -> TrialExecution:
         directory.mkdir(parents=True, exist_ok=False)
+        self._trial_directory = directory
+        software = (await asyncio.to_thread(self.orchestrator.status)).software
+        (directory / "software.json").write_text(
+            json.dumps(software or {"available": False, "reason": "not recorded"}, indent=2) + "\n"
+        )
         config = dict(
             name=definition.name,
             execution_context={"campaign_id": directory.parent.name, "trial_id": trial.id},

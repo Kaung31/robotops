@@ -1,0 +1,27 @@
+{
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic",
+  "include": [
+    "backend/robotops_backend/models.py",
+    "backend/robotops_backend/gateway.py",
+    "backend/robotops_backend/state.py",
+    "backend/robotops_backend/campaigns/models.py",
+    "backend/robotops_backend/campaigns/ownership.py",
+    "backend/robotops_backend/campaigns/repository.py",
+    "backend/robotops_backend/campaigns/service.py",
+    "backend/robotops_backend/campaigns/report_models.py",
+    "scripts/ci"
+  ],
+  "exclude": [
+    "scripts/ci/test"
+  ],
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": [
+        "backend",
+        "scripts"
+      ]
+    }
+  ]
+}

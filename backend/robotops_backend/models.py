@@ -170,6 +170,22 @@ class StackRequest(BaseModel):
     open_rviz: bool = False
 
 
+class ProcessExit(BaseModel):
+    name: str
+    exit_code: int | None
+    signal_path: str | None = None
+    escalated: str | None = None
+    child_failures: list[str] = Field(default_factory=list)
+    display_lost: bool = False
+
+
+class ShutdownReport(BaseModel):
+    """Exit evidence for the last stack shutdown; absence of processes alone is not clean."""
+
+    clean: bool
+    processes: list[ProcessExit] = Field(default_factory=list)
+
+
 class StackStatus(BaseModel):
     state: StackState = StackState.STOPPED
     mode: StackMode | None = None
@@ -183,6 +199,8 @@ class StackStatus(BaseModel):
     error: str | None = None
     rviz_running: bool = False
     rviz_error: str | None = None
+    software: dict | None = None
+    shutdown: ShutdownReport | None = None
 
 
 class MapSaveRequest(BaseModel):

@@ -36,9 +36,20 @@ or change readiness/pose/contact verdicts. See the diagnostics package README.
 
 For locally rendered simulation launched with `ROBOTOPS_USE_XVFB=true`, the
 orchestrator records the exact ROS launch child under its owned `xvfb-run`
-wrapper. Graceful stop verifies that child's parent and Linux start time, then
-sends SIGINT to launch so Gazebo releases rendering resources before the wrapper
-stops Xvfb. Whole-group timeout escalation remains available for a hung stack.
-Killing Xvfb alongside Gazebo can cause XIO errors and teardown SIGSEGV; process
-cleanup alone does not prove clean exit. The opt-in regression is
-`backend/tests/runtime_loaded_shutdown.py` (sourced Jazzy workspace, Xvfb required).
+wrapper. `xvfb-run` is a shell script whose short-lived subshells share its
+argv, so those are never accepted as the launch. Graceful stop verifies the
+child's parent and Linux start time (searching again if the recorded identity
+is stale), then sends SIGINT to launch only, so Gazebo releases rendering
+resources before the wrapper stops Xvfb. If the launch cannot be found, no
+graceful signal is sent and timeout escalation (SIGTERM, then SIGKILL, to the
+whole group) handles the stack; a graceful group SIGINT would reach Xvfb and
+every node twice. Killing Xvfb alongside Gazebo can cause XIO errors and
+teardown SIGSEGV (warehouse benchmark W03, 2026-10-12).
+
+Process cleanup alone does not prove clean exit. Each stop produces a shutdown
+report (`StackStatus.shutdown`) built from the wrapper's exit code, any
+escalation, and the launch log's `process has died` and `XIO:` lines; campaign
+cleanup is confirmed only when that report is clean, and each trial directory
+receives `shutdown.json` and `software.json` (Git revision, dirty state and
+change hashes). The opt-in regression is `backend/tests/runtime_loaded_shutdown.py`
+(sourced Jazzy workspace, Xvfb required).

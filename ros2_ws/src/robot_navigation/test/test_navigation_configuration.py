@@ -1,6 +1,8 @@
 """Portable Nav2 configuration, geometry and command-contract regressions."""
 
+import hashlib
 import importlib.util
+import json
 import math
 from pathlib import Path
 
@@ -70,3 +72,37 @@ def test_sensor_topic_parent_namespace():
     for topic in ("", "~scan", "scan/", "../scan", "a//scan", "https://scan", "/1scan"):
         with pytest.raises(ValueError):
             sensor_topic(topic)
+
+
+# Canonical parsed-value pins captured from accepted integration 8430110 before
+# reconstruction. Dict order is irrelevant; scalar types/list order are significant.
+ACCEPTED_CONFIG_VALUES = {
+    "navigation.yaml": "dfd446025093e2790b653adac2e79a23d78de453361e2b49c6fc98d307d0f79a",
+    "localization.yaml": "c0ccb155f59f3602ccc82c2dafb9bd1ed7c9def949157e7956c3f3d9e50e0425",
+    "profiles/navfn_rpp.yaml": "3c3202cb6de499e143176535dbab4b8281291988c41f847d371d7e517313e129",
+    "profiles/smac_dwb.yaml": "1e0bc38846920031f04890546876367a5d2b7e5b0e0ff98d795c646c6d7eef44",
+    "slam.yaml": "03b601ed4d9f9cafc4619210a0302b761cf00b7f2bd9808e9b5d208f0964a478",
+}
+ACCEPTED_EFFECTIVE = {
+    ("navfn_rpp", False): "73dd3e41748ec0b3d1ebd23c58d30a5ab1c988b60ac135aab1bc60406635e575",
+    ("smac_dwb", False): "d7bb4eb083a8b787943a503b05a7ae301a8731dd2f7e595093d014dd097f8873",
+    ("navfn_rpp", True): "aaa521b3c8981a3c3a60e60f562afa5ec696ae018f3ecc636748f1c34eef6f9e",
+    ("smac_dwb", True): "509b4a28a4a07b034dbeeffc8d3b2c546b980f990394315fafea66fde23869e6",
+}
+
+
+def semantic_hash(value):
+    data = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    return hashlib.sha256(data).hexdigest()
+
+
+@pytest.mark.parametrize("filename,expected", ACCEPTED_CONFIG_VALUES.items())
+def test_reconstruction_preserves_accepted_typed_values(filename, expected):
+    assert semantic_hash(yaml.safe_load((PACKAGE / "config" / filename).read_bytes())) == expected
+
+
+@pytest.mark.parametrize("key,expected", ACCEPTED_EFFECTIVE.items())
+def test_reconstruction_preserves_composed_profile(key, expected):
+    profile, clock = key
+    value = module.navigation_parameters(PACKAGE / "config", profile, GEOMETRY, clock)
+    assert semantic_hash(value) == expected

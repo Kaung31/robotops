@@ -7,7 +7,7 @@ import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import * as jsx from 'react/jsx-runtime';
 import ts from 'typescript';
-import {inspectBundle,inspectSite,stage,exposure,pins} from '../scripts/stage-release.mjs';
+import {inspectBundle,inspectSite,stage,exposure,pins,warehouseIds,expectedAssets} from '../scripts/stage-release.mjs';
 const read=async path=>readFile(new URL(path,import.meta.url),'utf8');
 test('portfolio is honest, semantic and uses approved repository link without live imports',async()=>{
  const source=await read('../src/portfolio/Portfolio.tsx');
@@ -54,4 +54,15 @@ test('bundle tampering/missing/extra files rejected without modifying original e
 test('data inclusion is explicit candidate-only and fixed allowlist, not default build',async()=>{
  const p=JSON.parse(await read('../package.json'));assert(!p.scripts['build:site'].includes('include-candidate-data'));assert.match(p.scripts['build:candidate'],/include-candidate-data/);
  const s=await read('../scripts/include-candidate-data.mjs');assert.match(s,/inspectBundle/);assert.match(s,/candidate-data/);assert.match(s,/flag:'wx'/);assert.doesNotMatch(s,/fetch\(|process.env|process.argv/);
+});
+
+const warehouseFixtures=resolve(new URL('../../artifacts/warehouse-lab-20261013/',import.meta.url).pathname);
+let warehouseAvailable=process.env.ROBOTOPS_SKIP_PRIVATE!=='1';
+try{await readFile(join(warehouseFixtures,'dataset-w06-final/manifest.json'));}catch{warehouseAvailable=false;}
+test('warehouse bundles: exact pinned inventories survive staging inspection; exposure is explicit',{skip:warehouseAvailable?false:'Private warehouse bundles intentionally absent'},async()=>{
+ for(const id of warehouseIds){const files=await inspectBundle(join(warehouseFixtures,`dataset-${id}-final`),id);assert.equal(files.size,2+expectedAssets(id).length);assert.equal(files.get('dataset.sha256').toString(),`${pins[id]}  manifest.json\n`);}
+ assert.match(exposure('__local_v2/w03/manifest.json'),/not-qualified/);assert.match(exposure('__local_v2/w03/manifest.json'),/never included/);
+ const temp=await mkdtemp(join(tmpdir(),'robotops-warehouse-'));
+ try{await cp(join(warehouseFixtures,'dataset-w03-final'),temp,{recursive:true});await rm(join(temp,'scans-006.json.gz'));await assert.rejects(inspectBundle(temp,'w03'));await assert.rejects(inspectBundle(join(warehouseFixtures,'dataset-w03-final'),'w04'),/Unapproved manifest/);}
+ finally{await rm(temp,{recursive:true,force:true});}
 });

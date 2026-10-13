@@ -8,7 +8,7 @@ import signal
 import subprocess
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from .models import (
@@ -17,14 +17,20 @@ from .models import (
     MapSaveRequest,
     MapSaveResult,
     NavigationProfile,
+    ProcessExit,
+    ShutdownReport,
     StackMode,
     StackRequest,
     StackState,
     StackStatus,
     WorldOption,
 )
+from .software import software_identity
 
 _MAP_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
+# ROS launch reports every child exit; a death or lost X display is not a clean stop.
+_CHILD_DIED = re.compile(r"\[ERROR\] \[([^\]]+)\]: process has died \[pid \d+, exit code (-?\d+)")
+_RECORDING_PROFILES = ("standard", "validation")
 
 
 @dataclass
@@ -36,6 +42,9 @@ class _ManagedProcess:
     wrapped_launch_pid: int | None = None
     wrapped_launch_start: int | None = None
     direct_ros_launch: bool = False
+    command: list[str] = field(default_factory=list)
+    signal_path: str | None = None
+    escalated: str | None = None
 
 
 class StackOrchestrator:
@@ -126,6 +135,7 @@ class StackOrchestrator:
                     request.navigation_profile if request.mode == StackMode.NAVIGATION else None
                 ),
                 started_at_ns=str(time.time_ns()),
+                software=software_identity(self.repo_root),
             )
 
             commands = self._commands(request, map_path)
@@ -145,7 +155,7 @@ class StackOrchestrator:
             except Exception as exc:
                 self._status.state = StackState.FAILED
                 self._status.error = str(exc)
-                self._stop_locked()
+                self._status.shutdown = self._stop_locked()
                 raise
 
             self._status.state = StackState.RUNNING
@@ -172,7 +182,7 @@ class StackOrchestrator:
                 return self._status.model_copy(deep=True)
             self._stop_requested = True
             self._status.state = StackState.STOPPING
-            self._stop_locked()
+            self._status.shutdown = self._stop_locked()
             self._status.state = StackState.STOPPED
             self._status.processes = []
             self._status.stopped_at_ns = str(time.time_ns())
@@ -438,12 +448,28 @@ class StackOrchestrator:
             f"environment:={request.world}",
             f"navigation_profile:={request.navigation_profile}",
             f"map_file:={map_path}",
+            *self._mission_provenance_args(),
         ]
         return [
             ("robot", robot_cmd, robot_env),
             ("navigation", navigation, os.environ.copy()),
             ("mission", mission, os.environ.copy()),
         ]
+
+    def _mission_provenance_args(self) -> list[str]:
+        args = []
+        software = self._status.software or {}
+        if software.get("available"):
+            args += [f"software_revision:={software['describe']}", "software_revision_source:=git"]
+        # Opt-in: the validation profile also records /amcl_pose and simulator ground truth.
+        profile = os.getenv("ROBOTOPS_RECORDING_PROFILE", "").strip().lower()
+        if profile:
+            if profile not in _RECORDING_PROFILES:
+                raise ValueError(
+                    f"ROBOTOPS_RECORDING_PROFILE must be one of {_RECORDING_PROFILES}"
+                )
+            args.append(f"recording_profile:={profile}")
+        return args
 
     def _use_xvfb(self) -> bool:
         value = os.getenv("ROBOTOPS_USE_XVFB", "true").strip().lower()
@@ -466,7 +492,12 @@ class StackOrchestrator:
             handle.close()
             raise
         item = _ManagedProcess(
-            name, process, handle, log_path, direct_ros_launch=command[:2] == ["ros2", "launch"]
+            name,
+            process,
+            handle,
+            log_path,
+            command=list(command),
+            direct_ros_launch=command[:2] == ["ros2", "launch"],
         )
         self._processes[name] = item
         if command[:2] == ["xvfb-run", "-a"]:
@@ -491,38 +522,82 @@ class StackOrchestrator:
         except (OSError, ValueError, IndexError):
             return None
 
+    @staticmethod
+    def _cmdline(pid: int) -> list[str]:
+        raw = Path(f"/proc/{pid}/cmdline").read_bytes().split(b"\0")
+        return [os.fsdecode(arg) for arg in raw if arg]
+
+    @staticmethod
+    def _launch_args_match(args: list[str], command: list[str], wrapper_args: list[str]) -> bool:
+        """Match the launched command, never a forked copy of its shell wrapper.
+
+        xvfb-run forks command substitutions and its Xvfb subshell; until they exit or
+        exec, their argv is the wrapper's own argv, which also contains the command.
+        """
+        if not args or args == wrapper_args:
+            return False
+        return any(
+            Path(arg).name == command[0] and args[index + 1 :] == command[1:]
+            for index, arg in enumerate(args)
+        )
+
     @classmethod
     def _wrapped_launch_child(cls, parent: int, command: list[str]) -> tuple[int, int] | None:
         try:
-            children = Path(f"/proc/{parent}/task/{parent}/children").read_text().split()
-            for child in children:
-                pid = int(child)
-                args = Path(f"/proc/{pid}/cmdline").read_bytes().split(b"\0")
-                args = [os.fsdecode(arg) for arg in args if arg]
-                for index, arg in enumerate(args):
-                    if Path(arg).name == command[0] and args[index + 1 :] == command[1:]:
-                        identity = cls._process_identity(pid)
-                        if identity is not None and identity[0] == parent:
-                            return pid, identity[1]
+            wrapper_args = cls._cmdline(parent)
+        except OSError:
+            wrapper_args = []
+        try:
+            children = [
+                int(c) for c in Path(f"/proc/{parent}/task/{parent}/children").read_text().split()
+            ]
         except (OSError, ValueError):
-            pass
+            return None
+        for pid in children:
+            try:
+                args = cls._cmdline(pid)
+            except OSError:
+                continue  # exited between listing and reading, e.g. a command substitution
+            if cls._launch_args_match(args, command, wrapper_args):
+                identity = cls._process_identity(pid)
+                if identity is not None and identity[0] == parent:
+                    return pid, identity[1]
         return None
 
-    def _interrupt_managed(self, item: _ManagedProcess) -> None:
-        if item.direct_ros_launch:
-            # Launch forwards SIGINT to its children. A group signal would reach
-            # them twice and can interrupt rclcpp after its handler is removed.
-            item.process.send_signal(signal.SIGINT)
-            return
+    def _current_wrapped_child(self, item: _ManagedProcess) -> int | None:
         pid = item.wrapped_launch_pid
         if pid is not None and self._process_identity(pid) == (
             item.process.pid,
             item.wrapped_launch_start,
         ):
-            # Signal the verified child, not its wrapper/display process group.
-            os.kill(pid, signal.SIGINT)
-        else:
+            return pid
+        # The recorded identity can be stale; look again rather than guess.
+        found = self._wrapped_launch_child(item.process.pid, item.command[2:])
+        if found is None:
+            return None
+        item.wrapped_launch_pid, item.wrapped_launch_start = found
+        return found[0]
+
+    def _interrupt_managed(self, item: _ManagedProcess) -> None:
+        if item.direct_ros_launch:
+            # Launch forwards SIGINT to its children. A group signal would reach
+            # them twice and can interrupt rclcpp after its handler is removed.
+            item.signal_path = "launch"
+            item.process.send_signal(signal.SIGINT)
+            return
+        if item.command[:1] != ["xvfb-run"]:
+            item.signal_path = "group"
             os.killpg(item.process.pid, signal.SIGINT)
+            return
+        child = self._current_wrapped_child(item)
+        if child is None:
+            # Never fall back to a group SIGINT here: the group holds Xvfb and every
+            # node, so nodes are interrupted twice and the display vanishes under
+            # Gazebo's renderer (W03, 2026-10-12). Bounded escalation still applies.
+            item.signal_path = "launch_not_found"
+            return
+        item.signal_path = "wrapped_launch"
+        os.kill(child, signal.SIGINT)
 
     def _monitor_processes(self) -> None:
         while True:
@@ -550,7 +625,7 @@ class StackOrchestrator:
                 # however, close the RobotOps-owned RViz as part of failure cleanup
                 # so we do not leave an orphan engineering window behind.
                 self._stop_rviz_locked()
-                self._stop_locked()
+                self._status.shutdown = self._stop_locked()
                 return
 
     def _refresh_locked(self) -> None:
@@ -568,7 +643,7 @@ class StackOrchestrator:
                 f"see {first.log_path.relative_to(self.repo_root)}"
             )
 
-    def _stop_locked(self) -> None:
+    def _stop_locked(self) -> ShutdownReport:
         managed = list(reversed(list(self._processes.values())))
         for item in managed:
             if item.process.poll() is None:
@@ -583,6 +658,7 @@ class StackOrchestrator:
                 try:
                     item.process.wait(timeout=remaining)
                 except subprocess.TimeoutExpired:
+                    item.escalated = "SIGTERM"
                     try:
                         os.killpg(item.process.pid, signal.SIGTERM)
                     except ProcessLookupError:
@@ -594,6 +670,7 @@ class StackOrchestrator:
                 try:
                     item.process.wait(timeout=remaining)
                 except subprocess.TimeoutExpired:
+                    item.escalated = "SIGKILL"
                     try:
                         os.killpg(item.process.pid, signal.SIGKILL)
                     except ProcessLookupError:
@@ -604,6 +681,40 @@ class StackOrchestrator:
                         pass
             item.log_handle.close()
         self._processes.clear()
+        return self._shutdown_report(managed)
+
+    @staticmethod
+    def _launch_log_failures(path: Path) -> tuple[list[str], bool]:
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return ["launch log unreadable"], False
+        failures = [f"{name} exit {code}" for name, code in _CHILD_DIED.findall(text)]
+        return failures, "XIO:" in text
+
+    @classmethod
+    def _shutdown_report(cls, managed: list[_ManagedProcess]) -> ShutdownReport:
+        processes = []
+        for item in managed:
+            failures, display_lost = cls._launch_log_failures(item.log_path)
+            processes.append(
+                ProcessExit(
+                    name=item.name,
+                    exit_code=item.process.returncode,
+                    signal_path=item.signal_path,
+                    escalated=item.escalated,
+                    child_failures=failures,
+                    display_lost=display_lost,
+                )
+            )
+        clean = all(
+            p.exit_code == 0
+            and p.escalated is None
+            and not p.child_failures
+            and not p.display_lost
+            for p in processes
+        )
+        return ShutdownReport(clean=clean, processes=processes)
 
     def _discover_maps(self) -> list[MapArtifact]:
         if not self.maps_dir.is_dir():

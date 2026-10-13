@@ -57,6 +57,19 @@ def workspace(tmp_path):
                 )
             source = generated / target.name
         shutil.copyfile(source, target)
+    # Current-source fixtures are new specifications, not the historical matrix.
+    # Rebind only reconstructed YAML byte pins, retaining frozen effective hashes.
+    current = matrix.model_dump(mode="json")
+    reconstructed = {
+        "ros2_ws/src/robot_navigation/config/navigation.yaml",
+        "ros2_ws/src/robot_navigation/config/localization.yaml",
+        "ros2_ws/src/robot_navigation/config/profiles/navfn_rpp.yaml",
+        "ros2_ws/src/robot_navigation/config/profiles/smac_dwb.yaml",
+    }
+    for pin in [*current["shared"], *[p["source"] for p in current["profiles"].values()]]:
+        if pin["path"] in reconstructed:
+            pin["sha256"] = digest((tmp_path / pin["path"]).read_bytes())
+    write_matrix(tmp_path, current)
     return tmp_path
 
 
@@ -222,7 +235,7 @@ def test_strict_matrix_and_expected_campaigns(workspace):
     ],
 )
 def test_invalid_matrix_rejected(workspace, mutation):
-    d = json.loads(MATRIX.read_bytes())
+    d = json.loads((workspace / "benchmarks/warehouse_v1/matrix.json").read_bytes())
     if mutation == "duplicate":
         d["trials"][1]["slot"] = "W01"
     if mutation == "order":
@@ -259,7 +272,7 @@ def test_invalid_matrix_rejected(workspace, mutation):
 
 @pytest.mark.parametrize("mutation", ["missing", "hash", "symlink", "effective"])
 def test_file_and_effective_parameter_integrity(workspace, mutation):
-    d = json.loads(MATRIX.read_bytes())
+    d = json.loads((workspace / "benchmarks/warehouse_v1/matrix.json").read_bytes())
     p = workspace / d["profiles"]["navfn_rpp"]["source"]["path"]
     if mutation == "missing":
         p.unlink()
@@ -282,7 +295,7 @@ def test_file_and_effective_parameter_integrity(workspace, mutation):
     [("world", "mapping_lab"), ("map_id", "lab"), ("profiles", ["smac_dwb"]), ("repetitions", 3)],
 )
 def test_rehashed_wrong_campaign_still_rejected(workspace, field, value):
-    d = json.loads(MATRIX.read_bytes())
+    d = json.loads((workspace / "benchmarks/warehouse_v1/matrix.json").read_bytes())
     s = d["trials"][0]
     p = workspace / s["config_ref"]
     proposal = json.loads(p.read_bytes())
@@ -332,11 +345,11 @@ def test_legacy_unassociated_map_still_allowed(tmp_path):
         o._resolve_map("lab", "warehouse_v1")
 
 
-def index_data():
+def index_data(matrix_path=MATRIX):
     # No private fixture dependency: construct the exact initial index from public models.
     return {
         "schema_version": 1,
-        "matrix_sha256": digest(MATRIX.read_bytes()),
+        "matrix_sha256": digest(matrix_path.read_bytes()),
         "qualification": "UNASSESSED_NO_EXPERIMENT_VERDICT",
         "slots": [
             {
@@ -367,7 +380,7 @@ def index_data():
 
 
 def test_planned_not_run_and_incomplete_evidence_remain_explicit(workspace):
-    d = index_data()
+    d = index_data(workspace / "benchmarks/warehouse_v1/matrix.json")
     d["slots"][1].update(state="NOT_RUN", reason="Sequence stopped before dispatch")
     d["slots"][0].update(
         state="ATTEMPTED",
@@ -400,7 +413,7 @@ def test_planned_not_run_and_incomplete_evidence_remain_explicit(workspace):
     ],
 )
 def test_evidence_does_not_fabricate_or_hide_missing_data(workspace, mutation):
-    d = index_data()
+    d = index_data(workspace / "benchmarks/warehouse_v1/matrix.json")
     s = d["slots"][0]
     if mutation == "duplicate":
         d["slots"][1]["slot"] = "W01"
@@ -450,7 +463,7 @@ def test_machine_readable_schemas_match_models():
 
 
 def test_rehashed_map_world_mismatch_is_rejected(workspace):
-    d = json.loads(MATRIX.read_bytes())
+    d = json.loads((workspace / "benchmarks/warehouse_v1/matrix.json").read_bytes())
     world = workspace / d["scenario"]["world"]["path"]
     world.write_bytes(world.read_bytes().replace(b"0.8 4.0 1.2", b"1.0 4.0 1.2"))
     metadata = workspace / d["scenario"]["map_metadata"]["path"]
@@ -518,8 +531,11 @@ def test_prepare_matrix_is_reproducible_new_only_and_private(workspace):
     )
     prepare_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(prepare_module)
-    # Only newly copied temporary specifications are removed, never historical artifacts.
+    # Reproduce a temporary current-source specification, never rewrite history.
     directory = workspace / "benchmarks/warehouse_v1"
+    expected = {p.name: p.read_bytes() for p in (ROOT / "benchmarks/warehouse_v1").rglob("*.json")}
+    expected["matrix.json"] = (directory / "matrix.json").read_bytes()
+    expected_index = index_data(directory / "matrix.json")
     for path in directory.rglob("*.json"):
         path.unlink()
     (workspace / "docs/plans").mkdir(parents=True)
@@ -530,8 +546,8 @@ def test_prepare_matrix_is_reproducible_new_only_and_private(workspace):
     index = workspace / "artifacts/prepared-index.json"
     prepare_module.prepare(workspace, index)
     for path in directory.rglob("*.json"):
-        assert path.read_bytes() == (ROOT / path.relative_to(workspace)).read_bytes()
-    assert json.loads(index.read_bytes()) == index_data()
+        assert path.read_bytes() == expected[path.name]
+    assert json.loads(index.read_bytes()) == expected_index
     with pytest.raises(FileExistsError):
         prepare_module.prepare(workspace, index)
     with pytest.raises(ValueError):
@@ -615,3 +631,29 @@ def test_floor_contract_preflight_rejects_original_mismatch():
     wrong = generated.replace(b'name="control_pad_floor"', b'name="warehouse_floor"')
     with pytest.raises(ValueError, match="support-floor identity"):
         scenario.validate_support_floor(wrong, robot)
+
+
+def test_frozen_matrix_rejects_reconstructed_byte_identities(workspace):
+    # Historical pins are evidence, not aliases for semantically equal new files.
+    historical = WarehouseMatrix.model_validate_json(MATRIX.read_bytes())
+    pins = [*historical.shared, *[p.source for p in historical.profiles.values()]]
+    mismatches = []
+    for pin in pins:
+        try:
+            pin.verify(workspace)
+        except ValueError as error:
+            assert "Hash mismatch:" in str(error)
+            mismatches.append(pin.path)
+    assert set(mismatches) == {
+        "ros2_ws/src/robot_navigation/config/navigation.yaml",
+        "ros2_ws/src/robot_navigation/config/localization.yaml",
+        "ros2_ws/src/robot_navigation/config/profiles/navfn_rpp.yaml",
+        "ros2_ws/src/robot_navigation/config/profiles/smac_dwb.yaml",
+    }
+    path = write_matrix(workspace, historical.model_dump(mode="json"))
+    assert path.read_bytes() == MATRIX.read_bytes()
+    with pytest.raises(ValueError, match="Hash mismatch:.*navigation.yaml"):
+        validate_matrix(workspace, path)
+    # Despite distinct source bytes, the accepted effective tuning stays pinned.
+    for name, value in parameters(ROOT).items():
+        assert digest(canonical(value)) == historical.profiles[name].effective_parameters_sha256
