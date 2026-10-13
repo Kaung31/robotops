@@ -1,184 +1,141 @@
-name: Robot foundation CI
+name: RobotOps CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   portable:
+    name: Python and static checks
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
           python-version: '3.12'
           cache: pip
-      - run: python -m pip install -r requirements-dev.txt
-      - name: Python formatting and lint
-        run: |
-          ruff format --check .
-          ruff check .
-      - name: C++ formatting
-        run: |
-          find ros2_ws/src -type f \( -name '*.cpp' -o -name '*.hpp' \) \
-            -exec clang-format --dry-run --Werror {} +
-      - name: YAML and CMake lint
-        run: |
-          yamllint .
-          find ros2_ws/src -name CMakeLists.txt -exec cmake-lint {} +
-          find ros2_ws/src -name CMakeLists.txt -exec cmake-format --check {} +
-      - name: XML syntax and model contracts
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxml2-utils
-          find ros2_ws/src -type f \( -name '*.xml' -o -name '*.xacro' -o -name '*.sdf' \) \
-            -exec xmllint --noout {} +
-          python -m pytest -q
-
-  web:
-    name: Web typecheck and build
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+          cache-dependency-path: |
+            requirements-ci.lock
+            requirements-dev.txt
+            backend/pyproject.toml
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: '22'
-      - name: Install web dependencies
+      - name: Install locked Python dependencies and backend
+        id: python_dependencies
+        run: |
+          python -m pip install -r requirements-ci.lock -r requirements-dev.txt
+          python -m pip install --no-deps --no-build-isolation -e backend
+          python -m pip check
+          sudo apt-get update
+          sudo apt-get install -y libxml2-utils shellcheck
+      - name: GitHub Actions workflow validation
+        run: bash scripts/ci/check_workflows.sh
+      - name: Python, C++, YAML, CMake and XML checks
+        run: bash scripts/ci/check_static.sh
+      - name: Scoped Python type checking
+        if: ${{ !cancelled() && steps.python_dependencies.outcome == 'success' }}
+        run: pyright --pythonpath "$(command -v python)"
+      - name: Backend, model and CI utility tests
+        if: ${{ !cancelled() && steps.python_dependencies.outcome == 'success' }}
+        run: bash scripts/ci/test_python.sh
+      - name: Upload Python test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: python-test-results
+          path: .ci-results/*.xml
+          retention-days: 14
+
+  web:
+    name: Web tests, typecheck and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
         working-directory: web
-        run: npm install --no-audit --no-fund
-      - name: Polling regression tests
-        working-directory: web
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install exact frontend lock
+        run: npm ci --no-audit --no-fund
+      - name: Frontend tests
         run: npm test
-      - name: Typecheck
-        working-directory: web
+      - name: TypeScript check
         run: npm run typecheck
-      - name: Build
-        working-directory: web
+      - name: Production build
         run: npm run build
-      - name: Build read-only replay code (no private data)
-        working-directory: web
+      - name: Read-only replay code build (no private dataset)
         run: npm run build:replay
 
   jazzy:
-    name: Jazzy ${{ matrix.suite }}
-    strategy:
-      fail-fast: false
-      matrix:
-        suite: [mock, sim, mapping, navigation, mission, experiment]
+    name: Jazzy build and passive package tests
     runs-on: ubuntu-24.04
-    container: ros:jazzy-ros-base-noble
+    timeout-minutes: 45
+    container: >-
+      ros:jazzy-ros-base-noble@sha256:a5426de405f6f0a82b0f3def3bbd3bce2a71a91421fe980c17613b4e51ef38d9
     defaults:
       run:
         shell: bash
-    env:
-      ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
-      ROS_DOMAIN_ID: '87'
-      # RobotOps uses Cyclone DDS for deterministic full-stack CI. The archived
-      # Fast DDS baseline showed a response-delivery race in a mission action.
-      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
     steps:
-      - uses: actions/checkout@v4
-      - name: Install package and test dependencies
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - name: Install declared ROS and test dependencies
         run: |
           apt-get update
-          apt-get install -y python3-colcon-common-extensions python3-rosdep \
-            python3-venv liburdfdom-tools \
-            xvfb xauth libgl1-mesa-dri ros-jazzy-rmw-cyclonedds-cpp
+          apt-get install -y python3-colcon-common-extensions python3-rosdep python3-venv
           if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then rosdep init; fi
           rosdep update --rosdistro jazzy
-          rosdep install --from-paths ros2_ws/src --ignore-src --rosdistro jazzy -r -y
-      - name: Build
-        run: |
-          source /opt/ros/jazzy/setup.bash
-          cd ros2_ws
-          colcon build --event-handlers console_direct+
-          if [ "${{ matrix.suite }}" = sim ]; then
-            colcon build --packages-select robot_bringup --cmake-args -DROBOTOPS_SIM_TESTS=ON
-            colcon build --packages-select robot_simulation \
-              --cmake-args -DROBOTOPS_GAZEBO_SHUTDOWN_TESTS=ON
-          elif [ "${{ matrix.suite }}" = mapping ]; then
-            colcon build --packages-select robot_navigation --cmake-args -DROBOTOPS_MAPPING_TESTS=ON
-          elif [ "${{ matrix.suite }}" = navigation ]; then
-            colcon build --packages-select robot_navigation \
-              --cmake-args -DROBOTOPS_NAVIGATION_TESTS=ON
-          elif [ "${{ matrix.suite }}" = mission ]; then
-            colcon build --packages-select mission_manager \
-              --cmake-args -DROBOTOPS_MISSION_SIM_TESTS=ON
-          elif [ "${{ matrix.suite }}" = experiment ]; then
-            colcon build --packages-select experiment_runner \
-              --cmake-args -DROBOTOPS_EXPERIMENT_SIM_TESTS=ON
-          fi
-      - name: Check installed resources outside the source tree
+          rosdep install --from-paths ros2_ws/src --ignore-src --rosdistro jazzy -y
+          rosdep check --from-paths ros2_ws/src --ignore-src --rosdistro jazzy
+      - name: Build all packages without running robotics
+        run: bash scripts/ci/build_ros.sh
+      - name: Verify installed manifests, resources and Python imports
         run: |
           source /opt/ros/jazzy/setup.bash
           source ros2_ws/install/setup.bash
+          repository="$PWD"
           cd /tmp
-          xacro "$(ros2 pkg prefix --share robot_description)/urdf/robot.urdf.xacro" \
-            -o /tmp/robotops.urdf
-          check_urdf /tmp/robotops.urdf
-          ros2 launch robot_description description.launch.py --show-args
-      - name: Gateway callback scheduling regression
-        if: matrix.suite == 'mock'
+          python3 "$repository/scripts/ci/verify_ros_install.py" "$repository"
+      - name: Run explicit passive package test suite
+        run: bash scripts/ci/test_ros.sh
+      - name: Offline ROS-dependent utility fixtures
         run: |
           source /opt/ros/jazzy/setup.bash
           source ros2_ws/install/setup.bash
-          python3 -m venv --system-site-packages "$RUNNER_TEMP/robotops-gateway-tests"
-          "$RUNNER_TEMP/robotops-gateway-tests/bin/pip" install \
-            -c requirements-dev.txt pydantic pytest
-          "$RUNNER_TEMP/robotops-gateway-tests/bin/python" -m pytest -q \
-            backend/tests/test_ros_gateway_callbacks.py
-      - name: Test
-        run: |
-          source /opt/ros/jazzy/setup.bash
-          source ros2_ws/install/setup.bash
-          cd ros2_ws
-          if [ "${{ matrix.suite }}" = sim ]; then
-            xvfb-run -a colcon test --packages-select robot_bringup robot_simulation \
-              --return-code-on-test-failure --event-handlers console_direct+ \
-              --ctest-args -R '^(sim_control|gazebo_shutdown)$'
-          elif [ "${{ matrix.suite }}" = mapping ]; then
-            xvfb-run -a colcon test --packages-select robot_navigation \
-              --return-code-on-test-failure --event-handlers console_direct+ \
-              --ctest-args -R '^mapping_system$'
-          elif [ "${{ matrix.suite }}" = navigation ]; then
-            xvfb-run -a colcon test --packages-select robot_navigation \
-              --return-code-on-test-failure --event-handlers console_direct+ \
-              --ctest-args -R '^navigation_system$'
-          elif [ "${{ matrix.suite }}" = mission ]; then
-            xvfb-run -a colcon test --packages-select mission_manager \
-              --return-code-on-test-failure --event-handlers console_direct+ \
-              --ctest-args -R '^mission_system$'
-          elif [ "${{ matrix.suite }}" = experiment ]; then
-            xvfb-run -a colcon test --packages-select experiment_runner \
-              --return-code-on-test-failure --event-handlers console_direct+ \
-              --ctest-args -R '^experiment_system$'
-          else
-            colcon test --event-handlers console_direct+ --return-code-on-test-failure
-          fi
-      - name: Loaded rendered robot backend shutdown regression
-        if: matrix.suite == 'sim'
-        run: |
-          source /opt/ros/jazzy/setup.bash
-          source ros2_ws/install/setup.bash
-          python3 -m venv --system-site-packages "$RUNNER_TEMP/robotops-shutdown-tests"
-          "$RUNNER_TEMP/robotops-shutdown-tests/bin/pip" install \
-            -c requirements-dev.txt pydantic pytest
-          "$RUNNER_TEMP/robotops-shutdown-tests/bin/python" -m pytest -q \
-            -p no:launch_testing -p no:launch_ros backend/tests/runtime_loaded_shutdown.py
-      - name: Report test results
+          python3 -m venv --system-site-packages .ci-results/ros-venv
+          .ci-results/ros-venv/bin/pip install -c requirements-ci.lock pytest pydantic lark PyYAML
+          .ci-results/ros-venv/bin/python scripts/ci/prepare_ros_fixtures.py
+          .ci-results/ros-venv/bin/python -m pytest -q \
+            scripts/test/test_warehouse*.py --junitxml=.ci-results/ros-utilities.xml
+      - name: Report test results and resolved package versions
         if: always()
         run: |
+          mkdir -p .ci-results
+          dpkg-query -W > .ci-results/ros-system-packages.tsv
           source /opt/ros/jazzy/setup.bash
-          cd ros2_ws
-          colcon test-result --verbose
-      - name: Upload build and test logs
+          colcon test-result --test-result-base ros2_ws/build --verbose
+      - name: Upload build and test diagnostics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
-          name: jazzy-${{ matrix.suite }}-test-results
+          name: jazzy-passive-test-results
           path: |
             ros2_ws/log/
             ros2_ws/build/*/test_results/
+            .ci-results/ros-utilities.xml
+            .ci-results/ros-system-packages.tsv
+          retention-days: 14

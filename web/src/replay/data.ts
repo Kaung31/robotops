@@ -8,7 +8,7 @@ export interface Pose { ros_ns: string; offset_us: number; segment_id: string | 
 export interface Scan { ros_ns: string; offset_us: number; segment_id: string | null; map_base: Transform | null; base_lidar: Transform | null; map_quality: string; angle_min_rad: number; angle_increment_rad: number; selected_indices: number[]; ranges_m: (number | null)[]; validity: string[] }
 export interface Metric { name: string; value: number | null; unit: string; quality: string; source_ref: string; pointer: string }
 export interface Manifest {
-  schema_version: 1 | 2; dataset_id: string; publication_review: string;
+  schema_version: 1 | 2 | 3; dataset_id: string; publication_review: string;
   time: { mission_start_ns: string; mission_end_ns: string; recorded_start_ns: string; recorded_end_ns: string; offset_origin_ns: string; domain: string };
   scene: { width: number; height: number; resolution_m: number; origin: Vec3; free_threshold: number; occupied_threshold: number; negate: number; map_asset: string };
   assets: { path: string; bytes: number; sha256: string; kind: string; schema_version: number }[];

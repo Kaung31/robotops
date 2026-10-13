@@ -30,7 +30,18 @@ python scripts/warehouse_scenario.py \
   --output /tmp/robotops-warehouse-new-inspection
 ```
 
-With the normal backend Python dependencies available, check the existing plan:
+The frozen matrix binds historical **raw configuration bytes**, including the
+pre-reconstruction navigation YAML. Current YAML preserves effective values but
+cannot be substituted into this matrix; the strict checker correctly rejects its
+new hashes. Do not update historical pins or weaken validation. Use matching
+original source/configuration and the preserved private index for a historical
+check. The exact dirty software state of W01–W06 is not fully identified, so this
+is not a claim of exact runtime reproduction. Current source can support new
+normal campaigns, which require their own identities and do not rewrite v1.
+See [reproduction limits](../../docs/WAREHOUSE_BENCHMARK.md#reproduce) and
+[configuration provenance](../../docs/CONFIGURATION_PROVENANCE.md).
+
+With matching historical source and backend dependencies, check the existing plan:
 
 ```bash
 python scripts/prepare_warehouse_matrix.py check \
@@ -43,8 +54,10 @@ Do not submit campaign definitions to an operational API under the W1/W2 approva
 No Start button, execution service, fault route or recording exporter was added.
 
 See `docs/warehouse-w1-w2-implementation-review.md` for results and W3 approval gates.
-The frozen public-source candidate is separate. New source/configuration needs a
-future refreshed inventory/privacy review; five existing YAML provenance holds remain.
+The historical five-file YAML provenance holds were addressed prospectively by
+an owner-approved offline reconstruction. Their original authorship remains
+unresolved; the new configuration does not retroactively clear historical rights.
+The frozen matrix retains the old raw identities.
 
 ## Offline floor-contract correction — 2026-10-12
 

@@ -8,6 +8,9 @@ from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
+# "standard" keeps the mission server's default recording.yaml.
+RECORDING_PROFILES = {"standard": None, "validation": "recording_validation.yaml"}
+
 
 def start(context: LaunchContext) -> list:
     mode = LaunchConfiguration("mode").perform(context)
@@ -15,10 +18,22 @@ def start(context: LaunchContext) -> list:
     if mode not in clocks:
         raise ValueError("Mission launch supports mock/sim only; replay and real are disabled")
     provenance = {}
-    for name in ("environment", "navigation_profile", "map_file"):
+    for name in (
+        "environment",
+        "navigation_profile",
+        "map_file",
+        "software_revision",
+        "software_revision_source",
+    ):
         value = LaunchConfiguration(name).perform(context)
         if value:
             provenance[name] = value
+    profile = LaunchConfiguration("recording_profile").perform(context)
+    if profile not in RECORDING_PROFILES:
+        raise ValueError(f"recording_profile must be one of {sorted(RECORDING_PROFILES)}")
+    if RECORDING_PROFILES[profile]:
+        recorder = Path(get_package_share_directory("robot_recorder"))
+        provenance["recording_config"] = str(recorder / "config" / RECORDING_PROFILES[profile])
     return [
         Node(
             package="mission_manager",
@@ -44,6 +59,11 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("environment", default_value=""),
             DeclareLaunchArgument("navigation_profile", default_value=""),
             DeclareLaunchArgument("map_file", default_value=""),
+            DeclareLaunchArgument("software_revision", default_value=""),
+            DeclareLaunchArgument("software_revision_source", default_value=""),
+            DeclareLaunchArgument(
+                "recording_profile", default_value="standard", choices=list(RECORDING_PROFILES)
+            ),
             OpaqueFunction(function=start),
         ]
     )

@@ -1,36 +1,58 @@
 RobotOps
 Copyright 2026 The RobotOps Authors
 
-Licensed under the Apache License, Version 2.0 (see LICENSE).
+Original RobotOps source is licensed under the Apache License, Version 2.0
+(see LICENSE). Third-party dependencies retain their own terms.
 
-Third-party configuration
--------------------------
-These navigation configuration files follow upstream example configurations.
-Parameter names, structure and some default values come from those projects;
-RobotOps selects and tunes the values for its robot and worlds.
+Navigation configuration
+------------------------
+The following files were reconstructed offline on 2026-10-13 from documented
+parameter interfaces and the accepted RobotOps tuning values:
 
   ros2_ws/src/robot_navigation/config/navigation.yaml
   ros2_ws/src/robot_navigation/config/localization.yaml
   ros2_ws/src/robot_navigation/config/profiles/navfn_rpp.yaml
   ros2_ws/src/robot_navigation/config/profiles/smac_dwb.yaml
-    Based on Nav2 nav2_bringup/params/nav2_params.yaml. The DWB critic block in
-    smac_dwb.yaml is adapted from that file.
-    Nav2 (navigation2), Apache License 2.0
-    https://github.com/ros-navigation/navigation2
-
   ros2_ws/src/robot_navigation/config/slam.yaml
-    Parameter names follow SLAM Toolbox config/mapper_params_online_async.yaml.
-    SLAM Toolbox, GNU LGPL 2.1
-    https://github.com/SteveMacenski/slam_toolbox
+
+Their newly authored configuration and comments are Apache-2.0 RobotOps source.
+No upstream implementation, example prose or example configuration block was
+incorporated in the reconstruction. API names, plugin identifiers, parameter
+values and order-sensitive lists preserve the existing operational contract.
+
+Historical versions remain in Git with unresolved authorship. Prior NOTICE
+references to Nav2 examples and SLAM Toolbox identify possible relationships,
+not a proven source chain. The historical DWB critic block matches a Nav2 Humble
+example; that does not establish its actual origin or clear historical rights.
+The reconstruction does not retroactively license those versions.
+
+Interface references (not bundled implementation):
+  Nav2 / navigation2: https://github.com/ros-navigation/navigation2
+  SLAM Toolbox: https://github.com/SteveMacenski/slam_toolbox
+
+See docs/CONFIGURATION_PROVENANCE.md for pinned references, file-specific licence
+observations, reconstruction scope and unchanged semantic identities.
 
 Dependencies
 ------------
 RobotOps builds against, but does not include, ROS 2, Nav2, SLAM Toolbox,
-Gazebo, ros2_control and npm/PyPI packages. Their own licenses apply. The
-robot_navigation slam_runner links SLAM Toolbox (LGPL); review LGPL obligations
-before distributing compiled binaries or container images.
+Gazebo, ros2_control and npm/PyPI packages. Their own licenses apply. Nav2 has
+Apache, BSD and LGPL files; its repository is not uniformly Apache-2.0.
+SLAM Toolbox declares LGPL at package level, but inspected implementation files
+also contain non-specific CCPL headers. No such implementation is redistributed
+here. Setting its parameter interfaces does not import implementation text.
+The robot_navigation slam_runner links the installed SLAM Toolbox library;
+compiled binaries or container distributions require a separate dependency
+licence/compliance review, including LGPL obligations and header discrepancies.
 
 Recorded data
 -------------
-Recorded experiments, MCAP files and derived replay datasets are not part of
-this source release and are not covered by this license.
+The derived Recorded Lab replay datasets (Warehouse Navigation Benchmark v1
+W01-W06 and baselines N0/N2, as listed in the website's RELEASE.json) are
+licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/ . The
+licence text is web/release-config/DATA-LICENSE.txt. Raw MCAP recordings, logs,
+campaign databases and full reports are not published and are not licensed by
+this notice. The source code licence (Apache-2.0) does not cover the datasets.
+
+Dataset bundles are not included in this source repository. The release metadata
+records the accepted licence decision; it does not authorise deployment or upload.

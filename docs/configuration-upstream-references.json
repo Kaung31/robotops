@@ -1,0 +1,338 @@
+[
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "LICENSE",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/LICENSE",
+    "sha256": "e71fcb65bd31cdbdcf50cf43ab87a0c600ea3ec407495c2e15d1e68bc9c3bfc1",
+    "licence_observation": "Licence/format metadata inspected; no upstream text incorporated."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_bringup/package.xml",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_bringup/package.xml",
+    "sha256": "4ba633e9e8f921dff4ee02b8b094f65e41bb48bea652ef8fba6c84052a59debb",
+    "licence_observation": "Licence/format metadata inspected; no upstream text incorporated."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_bringup/params/nav2_params.yaml",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_bringup/params/nav2_params.yaml",
+    "sha256": "299f9002d6dcfbf661e532c99f32dda1766eab3afa3ab71a52378d80e7ef956f",
+    "licence_observation": "Unmarked reference: Nav2 LICENSE defaults unmarked files to Apache-2.0; example/docs not copied."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_bt_navigator/src/bt_navigator.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_bt_navigator/src/bt_navigator.cpp",
+    "sha256": "41c1cc5436f8e645eef4bfb393f41f7bc2a8da01f6fd2753e126b069b7a60c36",
+    "licence_observation": "File-specific Apache-2.0 header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_controller/src/controller_server.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_controller/src/controller_server.cpp",
+    "sha256": "444eb721b8a90de346061897e3a1f28aa6972b376697c8929e31d8412661c1a0",
+    "licence_observation": "File-specific Apache-2.0 header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_controller/plugins/simple_goal_checker.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_controller/plugins/simple_goal_checker.cpp",
+    "sha256": "aebed7edd5f991b4b37ec3e8c9b7596bab80f68eebe7d4798c9fe2cc39b0ba06",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_controller/plugins/simple_progress_checker.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_controller/plugins/simple_progress_checker.cpp",
+    "sha256": "f6b4e30b6d223cb1513db9ff1fcd71df511ebb6d3c1f7dac5c7cf6e8b874cee1",
+    "licence_observation": "File-specific Apache-2.0 header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_planner/src/planner_server.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_planner/src/planner_server.cpp",
+    "sha256": "82d49ac45f478ff8c12faef8f86a5c3ee5f86244a967762bf413b02c28a90b12",
+    "licence_observation": "File-specific Apache-2.0 header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_behaviors/src/behavior_server.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_behaviors/src/behavior_server.cpp",
+    "sha256": "29c07c73bc5c398b963d20fde3f22c5ff62e016dfad5fb56a3e86f16d498a0ec",
+    "licence_observation": "File-specific Apache-2.0 header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_behaviors/include/nav2_behaviors/timed_behavior.hpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_behaviors/include/nav2_behaviors/timed_behavior.hpp",
+    "sha256": "17616ea367f798607a17c34e64e32bca6dda6a679560bb05173a18494d72dd22",
+    "licence_observation": "File-specific Apache-2.0 header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_costmap_2d/src/costmap_2d_ros.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_costmap_2d/src/costmap_2d_ros.cpp",
+    "sha256": "ab441ba1ca791e906c62f0b0642d1a103c823a844b94bfcf3eee4c2eb12afc0f",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_costmap_2d/plugins/inflation_layer.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_costmap_2d/plugins/inflation_layer.cpp",
+    "sha256": "b2271d598f5b47322956cbf758d56299d191ff7b5989a04563439212b049b99d",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_costmap_2d/plugins/obstacle_layer.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_costmap_2d/plugins/obstacle_layer.cpp",
+    "sha256": "e2e6e56b04d6ade1ded6f17b08667dba220f453b6000c122ece638cee1839caf",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_costmap_2d/plugins/static_layer.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_costmap_2d/plugins/static_layer.cpp",
+    "sha256": "81606bf320d682901f661fa83223da42d5c631add5eb98e0055aee29cd1ac4ac",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_map_server/src/map_server/map_server.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_map_server/src/map_server/map_server.cpp",
+    "sha256": "13192df8c3ab5788a09a4b160ca6ba8ecfbba97501ead06a3ba463427d809f69",
+    "licence_observation": "File-specific Apache-2.0 header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_amcl/src/amcl_node.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_amcl/src/amcl_node.cpp",
+    "sha256": "8f458800deca6db48f53a9f6441fe010163aa3925ab40c6326b2762d7748aea8",
+    "licence_observation": "File-specific LGPL-2.1-or-later header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_navfn_planner/src/navfn_planner.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_navfn_planner/src/navfn_planner.cpp",
+    "sha256": "aac6f5f1be9098e707855d0fbe29e55ff7df057ddfe25cda63e47a61a959b208",
+    "licence_observation": "File-specific Apache-2.0 header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_regulated_pure_pursuit_controller/src/parameter_handler.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_regulated_pure_pursuit_controller/src/parameter_handler.cpp",
+    "sha256": "19c6af2e3308868a034d869f8dc2ca3333a625349fcc4f11eb2c33e98cd22969",
+    "licence_observation": "File-specific Apache-2.0 header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_regulated_pure_pursuit_controller/README.md",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_regulated_pure_pursuit_controller/README.md",
+    "sha256": "7f575ff802bca2a7d20651f5ec288991009a967e2428e5c6e90d1d704e514c9e",
+    "licence_observation": "Unmarked reference: Nav2 LICENSE defaults unmarked files to Apache-2.0; example/docs not copied."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_smac_planner/src/smac_planner_2d.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_smac_planner/src/smac_planner_2d.cpp",
+    "sha256": "e1a59440163259b558d3d34b6a12a87df3e07558dec69b8a2521fa60112f4836",
+    "licence_observation": "File-specific Apache-2.0 header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_smac_planner/README.md",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_smac_planner/README.md",
+    "sha256": "9367eb489fb2b3c3d0e0ee10c7e382f51f72c6830761ff5e5f1e0f6be25edc22",
+    "licence_observation": "Unmarked reference: Nav2 LICENSE defaults unmarked files to Apache-2.0; example/docs not copied."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_dwb_controller/dwb_core/src/dwb_local_planner.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_dwb_controller/dwb_core/src/dwb_local_planner.cpp",
+    "sha256": "872071624baaaa657b2b800848984c6821e171c90bf4bd25d66e2f27acd8aebd",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_dwb_controller/dwb_plugins/src/standard_traj_generator.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_dwb_controller/dwb_plugins/src/standard_traj_generator.cpp",
+    "sha256": "cd4ecb7987d902c354ead990e14e56388d4c5364ad26b26ea0d4ac9d4b2670a9",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_dwb_controller/dwb_plugins/src/kinematic_parameters.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_dwb_controller/dwb_plugins/src/kinematic_parameters.cpp",
+    "sha256": "83776b6ac17ba8e3a41c2251869c4a484ea38b422d927adae1c9175b0db0fcef",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_dwb_controller/dwb_critics/src/rotate_to_goal.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_dwb_controller/dwb_critics/src/rotate_to_goal.cpp",
+    "sha256": "0342b8d4e564603e9b40568a0238959f5609d126e997e90f4e857ab70649ed6d",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_dwb_controller/dwb_critics/src/path_align.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_dwb_controller/dwb_critics/src/path_align.cpp",
+    "sha256": "f6e426f88f7a159a5aa9874f3a31798a1212f8e210f1bfbc2bdb19d2dda0f96a",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_dwb_controller/dwb_critics/src/goal_align.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_dwb_controller/dwb_critics/src/goal_align.cpp",
+    "sha256": "4902a91613d33d5533ebc19d5b73232422d8aa3f885e46d307cf296ff90062bd",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "645abd95f2be02a13ca539b29c2ddc065db34f89",
+    "path": "nav2_dwb_controller/dwb_critics/src/base_obstacle.cpp",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/645abd95f2be02a13ca539b29c2ddc065db34f89/nav2_dwb_controller/dwb_critics/src/base_obstacle.cpp",
+    "sha256": "43fff6f3ef5972d57a92b3cfe007d0dc6126fedd1ec982628fdf2a4839fb6a4c",
+    "licence_observation": "File-specific BSD-3-Clause header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "ros-navigation/navigation2",
+    "commit": "3c3db59d6969d8ecee8e68468693d006397f4a0c",
+    "path": "nav2_bringup/params/nav2_params.yaml",
+    "url": "https://raw.githubusercontent.com/ros-navigation/navigation2/3c3db59d6969d8ecee8e68468693d006397f4a0c/nav2_bringup/params/nav2_params.yaml",
+    "sha256": "21f6a890657da341a854efce403c895304a3ebc1a8f91f466348e720f2641380",
+    "licence_observation": "Unmarked reference: Nav2 LICENSE defaults unmarked files to Apache-2.0; example/docs not copied."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "LICENSE",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/LICENSE",
+    "sha256": "20c17d8b8c48a600800dfd14f95d5cb9ff47066a9641ddeab48dc54aec96e331",
+    "licence_observation": "File-specific LGPL-2.1-or-later header; interface facts only, no code/prose reuse."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "package.xml",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/package.xml",
+    "sha256": "34cbdcee76b26a7709cc41f40ae6466e0edfb1a9fa97f35a173a8184075c6cb2",
+    "licence_observation": "No file-specific grant established beyond package LGPL/root LGPL-2.1 context; not reused."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "config/mapper_params_online_async.yaml",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/config/mapper_params_online_async.yaml",
+    "sha256": "a47dcd2ade5929b491d1897df539dceeabaaa3bfe6dc0d39f1f7af6c53d79a8c",
+    "licence_observation": "No file-specific grant established beyond package LGPL/root LGPL-2.1 context; not reused."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "src/slam_toolbox_common.cpp",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/src/slam_toolbox_common.cpp",
+    "sha256": "b9383600d326446e2dd99a1ab556ba6f5b1790a0dc28f9a89baeaadaa8317754",
+    "licence_observation": "File header invokes CCPL without identifying a variant/version; no reuse."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "src/slam_toolbox_async.cpp",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/src/slam_toolbox_async.cpp",
+    "sha256": "a871f4d9e47728179ff4dbc23b822418151318b16d51ac6715da02f8878fe75d",
+    "licence_observation": "File header invokes CCPL without identifying a variant/version; no reuse."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "include/slam_toolbox/slam_toolbox_common.hpp",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/include/slam_toolbox/slam_toolbox_common.hpp",
+    "sha256": "424b5176d758d9e55b40ea2e73041fc936ab6fa03edec119f4a4db7912fd9331",
+    "licence_observation": "File header invokes CCPL without identifying a variant/version; no reuse."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "include/slam_toolbox/laser_utils.hpp",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/include/slam_toolbox/laser_utils.hpp",
+    "sha256": "85f8c475d323e6ccce1aa98cf686bbd86248dfe2b379cf002df710d854272840",
+    "licence_observation": "File header invokes CCPL without identifying a variant/version; no reuse."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "include/slam_toolbox/slam_mapper.hpp",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/include/slam_toolbox/slam_mapper.hpp",
+    "sha256": "4738a127bad83e5e1af63c677fa755134529e99497f97177813c35343ff21e87",
+    "licence_observation": "File header invokes CCPL without identifying a variant/version; no reuse."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "src/laser_utils.cpp",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/src/laser_utils.cpp",
+    "sha256": "1d4a364015cd7209743d33b3f2c18d843b0e7a5ea939378af0ce9dc6de5a9ec9",
+    "licence_observation": "File header invokes CCPL without identifying a variant/version; no reuse."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "src/slam_mapper.cpp",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/src/slam_mapper.cpp",
+    "sha256": "abc642d764760f5304f5d3d88abe8e61bde4a52fbcdb803f49342844cecbe0e2",
+    "licence_observation": "File header invokes CCPL without identifying a variant/version; no reuse."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "README.md",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/README.md",
+    "sha256": "b73b114ac176dda6a52d19451aae26465fa122755dcc7c8a2e31f8765c33a366",
+    "licence_observation": "No file-specific grant established beyond package LGPL/root LGPL-2.1 context; not reused."
+  },
+  {
+    "repository": "SteveMacenski/slam_toolbox",
+    "commit": "02afdde003313a10b8d21461a92d9e5f4f0bc5f2",
+    "path": "solvers/ceres_solver.cpp",
+    "url": "https://raw.githubusercontent.com/SteveMacenski/slam_toolbox/02afdde003313a10b8d21461a92d9e5f4f0bc5f2/solvers/ceres_solver.cpp",
+    "sha256": "e55f6442834e9dc450b049570f34399d0654f86df956597af6eab700fcb7c118",
+    "licence_observation": "No file-specific grant established beyond package LGPL/root LGPL-2.1 context; not reused."
+  },
+  {
+    "repository": "ros2/rcl",
+    "commit": "18d96c9c2b98e616324ae9a2c7701dd0b0886ff0",
+    "path": "rcl_yaml_param_parser/README.md",
+    "url": "https://raw.githubusercontent.com/ros2/rcl/18d96c9c2b98e616324ae9a2c7701dd0b0886ff0/rcl_yaml_param_parser/README.md",
+    "sha256": "f86137379020fa77c11187d19b2231de6d24ad5a5a62b1743e9a8d1097b64108",
+    "licence_observation": "Licence/format metadata inspected; no upstream text incorporated."
+  }
+]

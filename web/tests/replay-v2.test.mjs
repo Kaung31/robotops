@@ -65,12 +65,15 @@ test('missing, conflicting-unit, duplicate, unqualified and non-comparable measu
 });
 test('comparison renders honest labels, categorical results separate and unavailable data without winner',()=>{
   const html=renderToStaticMarkup(React.createElement(ComparisonPanel,{originals:{},error:''}));
-  for(const text of ['Compare recorded experiments','Observational repeated baselines','Δ N2 − N0','Original ROS navigation outcome','Independent pose verification','Scoped contact observation','Recording coverage','Unavailable','random seeds','localisation initialisation','Planning latency'])assert(html.includes(text));
+  for(const text of ['Compare the two baseline recordings','Observational repeated baselines','Δ N2 − N0','Original ROS navigation outcome','Independent pose verification','Scoped contact observation','Recording coverage','Unavailable','random seeds','localisation initialisation','Planning latency'])assert(html.includes(text));
   assert.equal((html.match(/<details/g)||[]).length,1);assert.doesNotMatch(html,/winner score:|superior|best profile/i);
   assert.match(html,/saved ExecuteMission|Saved ExecuteMission/);
 });
 test('composition keys entire replay scene/visitor form to selection generation; no old data rendered in loading branch',async()=>{
-  const source=await read('../src/replay/main.tsx');assert.match(source,/state\.phase !== "ready"/);assert.match(source,/key=\{`\$\{state\.id\}:\$\{state\.generation\}`\}/);
+  const source=await read('../src/replay/main.tsx');assert.match(source,/const ready = state\.phase === "ready" \? state\.data : null/);
+  // Every visit opens on W01: no stored, URL or cross-visit selection that could reopen N0/N2.
+  assert.match(source,/const DEFAULT_ID: LabId = "W01"/);assert.match(source,/id: DEFAULT_ID, generation: 0/);assert.match(source,/controller\.select\(DEFAULT_ID\)/);
+  assert.doesNotMatch(source,/localStorage|sessionStorage|location\.(hash|search)|URLSearchParams|history\./);assert.match(source,/key=\{`\$\{state\.id\}:\$\{state\.generation\}`\}/);
   assert.match(source,/previous robot, LiDAR, trajectory and visitor results cleared/);
   assert.match(source,/loadDatasetV2\(id, fetch, signal\)/);assert.doesNotMatch(source,/loadN0\(/);
 });

@@ -1,0 +1,54 @@
+RobotOps Recorded Lab datasets
+Copyright 2026 The RobotOps Authors
+
+The Recorded Lab datasets listed below are licensed under the Creative Commons
+Attribution 4.0 International licence (CC BY 4.0).
+  Licence summary: https://creativecommons.org/licenses/by/4.0/
+  Legal code:      https://creativecommons.org/licenses/by/4.0/legalcode
+
+Scope
+-----
+This licence covers only these published dataset files:
+
+  __local_v2/w01/ ... __local_v2/w06/   Warehouse Navigation Benchmark v1, trials W01-W06
+  __local_v2/n0/, __local_v2/n2/         Earlier control-pad baselines N0 and N2
+
+Each directory contains manifest.json, dataset.sha256, map.pgm.gz and the
+poses-NNN.json.gz / scans-NNN.json.gz chunks listed in its manifest. The approved
+manifests are identified by these SHA-256 values:
+
+  W01 2c9007b91dd0d09c76d83e3f948303c678daf547a4b492860d6109d7106a7345
+  W02 6cc4928691c9f6e5fa47cee749c60a8f8f354e05dac53db16002cd59a4481561
+  W03 e1cce11951245ec85c9a7e00b3d5f5b48bc18c1fd87c820f81bb409d307b38ca
+  W04 5804cbb05697b7ac6b06991f95f0fc92538e77841f99bbe7995f77d85da31313
+  W05 8a3e4b9c51686dc2bdb737cf6c4b842469f63ef5613568a52a2096c0d3066e4b
+  W06 efdfaab4b5a2b25da3c7cfe81d250c7b60d942850d3f8b3ea315aec9de65e4a7
+  N0  670ccd62c5b5d0e74fc379c2ce9e478534995fd6af2571fc9933fc377d1f85f8
+  N2  a4d2c77a28e74d7124429ccc7f8c56010f81802898315bcc1d3de097912028d4
+
+Not covered: the website and its compiled code (RobotOps source is Apache-2.0;
+bundled third-party code is listed in THIRD_PARTY_NOTICES.txt). Raw MCAP
+recordings, logs, campaign databases and full campaign reports are not published.
+
+Attribution
+-----------
+When you share or adapt the datasets, credit them as:
+
+  "RobotOps Recorded Lab datasets (Warehouse Navigation Benchmark v1 and
+  baselines N0/N2), © 2026 The RobotOps Authors, licensed under CC BY 4.0,
+  https://github.com/Kaung31/robotops"
+
+and indicate whether you made changes, as the licence requires.
+
+About the data
+--------------
+The data come from Gazebo simulation, not a physical robot. The warehouse trials
+are an exploratory benchmark: three trials per configuration, not formally
+qualified. Each manifest records its own limitations, coverage gaps and the
+source hashes it was verified against. Poses are the robot's localization
+estimate, not simulator ground truth. The data are provided as-is; see the
+licence's disclaimer of warranties and limitation of liability (Section 5).
+
+Each manifest's `publication_review` field records the review status when it
+was exported (2026-10-13). Publication approval is recorded separately in
+RELEASE.json, so the audited dataset bytes stay unchanged.

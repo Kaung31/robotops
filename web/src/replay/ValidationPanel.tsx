@@ -2,17 +2,17 @@ import { useState, type FormEvent } from "react";
 import type { Dataset } from "./data";
 import { CHECKS, visitorCheck, type CheckId, type CheckResult } from "./validation";
 
-type Criteria = Record<CheckId, string>;
-export function ValidationPanel({ data }: { data: Dataset }) {
-  const [criteria, setCriteria] = useState<Criteria>({ duration: "25", xy: "0.2", yaw: "0.1" });
+export type Criteria = Record<CheckId, string>;
+export function ValidationPanel({ data, initial }: { data: Dataset; initial?: Criteria }) {
+  const [criteria, setCriteria] = useState<Criteria>(initial ?? { duration: "25", xy: "0.2", yaw: "0.1" });
   const [results, setResults] = useState<Record<CheckId, CheckResult> | null>(null);
   function run(event: FormEvent) {
     event.preventDefault();
     setResults({ duration: visitorCheck("duration", data.manifest.metrics, criteria.duration, data.trusted), xy: visitorCheck("xy", data.manifest.metrics, criteria.xy, data.trusted), yaw: visitorCheck("yaw", data.manifest.metrics, criteria.yaw, data.trusted) });
   }
   return <section className="result-card visitor" aria-labelledby="validation-title">
-    <div className="section-kicker">YOUR TESTS · ORIGINAL EVIDENCE STAYS UNCHANGED</div>
-    <h2 id="validation-title">Set your acceptance criteria</h2>
+    <div className="section-kicker visitor-kicker">YOUR CALCULATION · ORIGINAL EVIDENCE STAYS UNCHANGED</div>
+    <h3 id="validation-title">Set your acceptance criteria</h3>
     <form noValidate onSubmit={run}>
       <div className="validation-checks">{CHECKS.map(check => {
         const result = results?.[check.id];

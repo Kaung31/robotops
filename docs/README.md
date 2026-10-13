@@ -4,6 +4,8 @@ Start with [CURRENT_STATUS.md](CURRENT_STATUS.md) (one page) and the working rul
 in [AGENTS.md](../AGENTS.md#development-order). Source code and tests are the final
 authority on what exists.
 
+Results: [warehouse navigation benchmark v1](WAREHOUSE_BENCHMARK.md).
+
 ## Architecture and contracts
 
 - [ROS/local architecture](ARCHITECTURE.md), [specification](PROJECT_SPEC.md)

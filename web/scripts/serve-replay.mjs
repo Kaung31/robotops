@@ -5,12 +5,14 @@ import { readFile, lstat, readdir, realpath } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
+import { expectedAssets, pins, warehouseIds } from "./stage-release.mjs";
 const web = fileURLToPath(new URL("../", import.meta.url));
 const fixture = resolve(web, "../artifacts/p2-n0-20261011/dataset-final");
 const dist = resolve(web, "dist/replay");
 const v2 = new Map([
   ["n0", { root: resolve(web, "../artifacts/p4b-export-20261011/dataset-n0-final"), hash: "670ccd62c5b5d0e74fc379c2ce9e478534995fd6af2571fc9933fc377d1f85f8" }],
   ["n2", { root: resolve(web, "../artifacts/p4b-export-20261011/dataset-n2-final"), hash: "a4d2c77a28e74d7124429ccc7f8c56010f81802898315bcc1d3de097912028d4" }],
+  ...Object.entries(pins).filter(([id]) => warehouseIds.includes(id)).map(([id, hash]) => [id, { root: resolve(web, `../artifacts/warehouse-lab-20261013/dataset-${id}-final`), hash, names: new Set(["manifest.json", "dataset.sha256", ...expectedAssets(id)]) }]),
 ]);
 const approved = "755424dae361089465281af6706e51852ed1aa221cffe9504434b0fb6419aab4";
 const names = new Set(["manifest.json", "dataset.sha256", "map.pgm.gz", "poses-000.json.gz", "poses-001.json.gz", "poses-002.json.gz", "poses-003.json.gz", "scans-000.json.gz"]);
@@ -38,9 +40,9 @@ const server = createServer(async (req, res) => {
   try {
     let bytes, mime;
     if (path.startsWith("/__local_v2/")) {
-      const match = /^\/__local_v2\/(n0|n2)\/([a-z0-9.-]+)$/.exec(path);
+      const match = /^\/__local_v2\/(n0|n2|w0[1-6])\/([a-z0-9.-]+)$/.exec(path);
       const source = match && v2.get(match[1]);
-      if (!source || !names.has(match[2])) { res.statusCode = 404; res.end("Unknown fixture"); return; }
+      if (!source || !(source.names ?? names).has(match[2])) { res.statusCode = 404; res.end("Unknown fixture"); return; }
       const manifest = await regular(source.root, "manifest.json");
       if (createHash("sha256").update(manifest).digest("hex") !== source.hash) throw Error("Unapproved fixture");
       const name = match[2]; bytes = await regular(source.root, name);
@@ -68,5 +70,5 @@ const server = createServer(async (req, res) => {
 });
 server.on("upgrade", (_req, socket) => { console.warn("replay rejected WebSocket upgrade"); socket.end("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n"); });
 server.on("error", error => { console.error(error.message); process.exitCode = 1; });
-server.listen(5174, "127.0.0.1", () => console.log("Private local N0/N2 preview: http://127.0.0.1:5174/replay.html"));
+server.listen(5174, "127.0.0.1", () => console.log("Private local N0/N2 and W01-W06 preview: http://127.0.0.1:5174/replay.html"));
 for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => { server.close(); server.closeAllConnections(); });

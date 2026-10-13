@@ -30,3 +30,10 @@ export function coverageBands(data: Dataset) {
   }
   return bands;
 }
+// Seconds since the previous frame, captured when the frame runs. React may
+// evaluate a state updater after the next frame's timestamp has been stored, so
+// the updater must receive this value rather than read a shared variable.
+export function frameClock(start: number): (now: number) => number {
+  let previous = start;
+  return now => { const elapsed = Math.max(0, now - previous) / 1000; previous = now; return elapsed; };
+}

@@ -1,3 +1,6 @@
+import os
+import shutil
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -37,17 +40,88 @@ def test_wrapped_launch_matches_owned_child_and_exact_command(tmp_path, monkeypa
 
 
 @pytest.mark.parametrize("identity", [(44, 123), (44, 124), (99, 123), None])
-def test_wrapped_shutdown_guards_parent_and_start_time(tmp_path, monkeypatch, identity):
+@pytest.mark.parametrize("rescan", [None, (47, 200)])
+def test_wrapped_shutdown_never_group_signals_xvfb(tmp_path, monkeypatch, identity, rescan):
+    # A stale identity (e.g. a transient xvfb-run subshell recorded under load) used to
+    # fall back to a group SIGINT that hit Xvfb and every node twice (W03 2026-10-12).
     import robotops_backend.orchestrator as module
 
     orchestrator = StackOrchestrator(tmp_path)
     item = module._ManagedProcess("robot", SimpleNamespace(pid=44), None, tmp_path, 46, 123)
+    item.command = ["xvfb-run", "-a", "ros2", "launch", "robot_bringup", "robot.launch.py"]
     monkeypatch.setattr(orchestrator, "_process_identity", lambda _pid: identity)
+    monkeypatch.setattr(orchestrator, "_wrapped_launch_child", lambda _parent, _cmd: rescan)
     signals = []
     monkeypatch.setattr(module.os, "kill", lambda pid, _sig: signals.append(("child", pid)))
     monkeypatch.setattr(module.os, "killpg", lambda pid, _sig: signals.append(("group", pid)))
     orchestrator._interrupt_managed(item)
-    assert signals == ([("child", 46)] if identity == (44, 123) else [("group", 44)])
+    if identity == (44, 123):
+        assert signals == [("child", 46)]
+    elif rescan:
+        assert signals == [("child", 47)] and item.signal_path == "wrapped_launch"
+    else:
+        assert signals == [] and item.signal_path == "launch_not_found"
+
+
+def test_wrapper_subshell_is_not_the_launch():
+    command = ["ros2", "launch", "robot_bringup", "robot.launch.py"]
+    wrapper = ["/bin/sh", "/usr/bin/xvfb-run", "-a", *command]
+    launch = ["/usr/bin/python3", "/opt/ros/jazzy/bin/ros2", *command[1:]]
+    assert not StackOrchestrator._launch_args_match(wrapper, command, wrapper)
+    assert not StackOrchestrator._launch_args_match(["Xvfb", ":99"], command, wrapper)
+    assert StackOrchestrator._launch_args_match(launch, command, wrapper)
+
+
+def test_shutdown_report_requires_clean_child_exits(tmp_path):
+    import robotops_backend.orchestrator as module
+
+    clean, crashed = tmp_path / "clean.log", tmp_path / "crashed.log"
+    clean.write_text("[INFO] [twist_mux-5]: process has finished cleanly [pid 1]\n")
+    crashed.write_text(
+        "[ERROR] [twist_mux-5]: process has died [pid 2, exit code -2, cmd 'x'].\n"
+        '[gazebo_runner-2] XIO:  fatal IO error 0 (Success) on X server ":99"\n'
+        "[ERROR] [gazebo_runner-2]: process has died [pid 3, exit code -11, cmd 'y'].\n"
+    )
+    ok = module._ManagedProcess("robot", SimpleNamespace(returncode=0), None, clean)
+    bad = module._ManagedProcess("robot", SimpleNamespace(returncode=0), None, crashed)
+    assert StackOrchestrator._shutdown_report([ok]).clean
+    report = StackOrchestrator._shutdown_report([bad])
+    assert not report.clean  # launch exited 0, but its children did not
+    assert report.processes[0].child_failures == [
+        "twist_mux-5 exit -2",
+        "gazebo_runner-2 exit -11",
+    ]
+    assert report.processes[0].display_lost
+
+
+@pytest.mark.skipif(shutil.which("xvfb-run") is None, reason="xvfb-run is not installed")
+def test_real_xvfb_wrapper_stops_launch_once_and_cleanly(tmp_path):
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    received = tmp_path / "sigint"
+    fake = bin_dir / "ros2"
+    fake.write_text(
+        "#!/usr/bin/env python3\n"
+        "import signal, sys, time\n"
+        "def stop(*_):\n"
+        f"    open({str(received)!r}, 'a').write('INT\\n')\n"
+        "    time.sleep(0.2)\n"
+        "    sys.exit(0)\n"
+        "signal.signal(signal.SIGINT, stop)\n"
+        "time.sleep(60)\n"
+    )
+    fake.chmod(0o755)
+    env = dict(os.environ, PATH=f"{bin_dir}:{os.environ['PATH']}")
+    orchestrator = StackOrchestrator(tmp_path)
+    orchestrator.logs_dir.mkdir(parents=True, exist_ok=True)
+    orchestrator._start_process_locked(
+        "robot", ["xvfb-run", "-a", "ros2", "launch", "robotops_fake", "a:=1"], env
+    )
+    time.sleep(0.5)
+    report = orchestrator._stop_locked()
+    assert report.clean, report
+    assert report.processes[0].signal_path == "wrapped_launch"
+    assert received.read_text() == "INT\n"  # exactly once, never via the group
 
 
 def write_map(root: Path, name: str = "lab") -> None:
@@ -117,7 +191,37 @@ def test_commands_are_fixed_ros_launch_arguments(tmp_path):
     assert "environment:=mapping_lab" in mission
     assert "navigation_profile:=smac_dwb" in mission
     assert f"map_file:={map_path}" in mission
+    assert not any(arg.startswith("recording_profile:=") for arg in mission)
     assert all(";" not in arg for _, command, _ in commands for arg in command)
+
+
+def test_mission_receives_recorded_software_identity_and_opt_in_profile(tmp_path, monkeypatch):
+    write_map(tmp_path)
+    orchestrator = StackOrchestrator(tmp_path)
+    orchestrator._status.software = {"available": True, "describe": "git:abc+dirty:0123"}
+    request = StackRequest(
+        mode=StackMode.NAVIGATION, world="mapping_lab", map_id="lab", navigation_profile="smac_dwb"
+    )
+    monkeypatch.setenv("ROBOTOPS_RECORDING_PROFILE", "validation")
+    mission = orchestrator._commands(request, orchestrator._resolve_map("lab"))[2][1]
+    assert "software_revision:=git:abc+dirty:0123" in mission
+    assert "software_revision_source:=git" in mission
+    assert "recording_profile:=validation" in mission
+
+    monkeypatch.setenv("ROBOTOPS_RECORDING_PROFILE", "everything")
+    with pytest.raises(ValueError):
+        orchestrator._commands(request, orchestrator._resolve_map("lab"))
+
+
+def test_unavailable_software_identity_is_not_forwarded(tmp_path):
+    write_map(tmp_path)
+    orchestrator = StackOrchestrator(tmp_path)
+    orchestrator._status.software = {"available": False, "reason": "git unavailable"}
+    request = StackRequest(
+        mode=StackMode.NAVIGATION, world="mapping_lab", map_id="lab", navigation_profile="smac_dwb"
+    )
+    mission = orchestrator._commands(request, orchestrator._resolve_map("lab"))[2][1]
+    assert not any(arg.startswith("software_revision") for arg in mission)
 
 
 def test_map_world_metadata_filters_mismatched_navigation(tmp_path):

@@ -71,9 +71,12 @@ def test_loaded_rendered_robot_shutdown(tmp_path, monkeypatch, stop_kind):
             assert len(candidates) == 1, candidates
             os.kill(candidates[0], signal.SIGINT if stop_kind == "direct_int" else signal.SIGTERM)
             item.process.wait(timeout=20)
-        orchestrator._stop_locked()
+        report = orchestrator._stop_locked()
         log = item.log_path.read_text()
         assert item.process.returncode == 0, log
+        assert report.clean, (report, log)
+        if stop_kind == "backend":
+            assert report.processes[0].signal_path == "wrapped_launch", report
         assert "[gazebo_runner-2]: process has finished cleanly" in log, log
         assert "XIO:" not in log and "exit code -11" not in log, log
     finally:

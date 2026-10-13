@@ -60,6 +60,7 @@ class MissionServer(Node):
             "environment": "unspecified",
             "navigation_profile": "unspecified",
             "software_revision": "",
+            "software_revision_source": "",
             "map_file": "",
             "global_frame": "map",
             "startup_timeout": 15.0,
@@ -377,7 +378,9 @@ class MissionServer(Node):
                 started_utc=None,
                 started_ros_ns=None,
                 software_revision=self.settings["software_revision"] or None,
-                software_revision_source="operator supplied"
+                software_revision_source=(
+                    self.settings["software_revision_source"] or "operator supplied"
+                )
                 if self.settings["software_revision"]
                 else "unavailable",
                 experiment_id=None,

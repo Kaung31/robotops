@@ -33,14 +33,17 @@ const jsx = await import('react/jsx-runtime');
 const validation = compile(await readFile(new URL('../src/replay/validation.ts',import.meta.url),'utf8'), {'./data':engine});
 const panel = compile(await readFile(new URL('../src/replay/ValidationPanel.tsx',import.meta.url),'utf8'), {'react':React, 'react/jsx-runtime':jsx, './validation':validation});
 let mapProps;
-const {ReplayLab} = compile(await readFile(new URL('../src/replay/ReplayLab.tsx',import.meta.url),'utf8'), {'react':React, 'react/jsx-runtime':jsx, './data':engine, './presentation':presentation, './ValidationPanel':panel, '../components/MapView':{MapView:props=>{mapProps=props;return React.createElement('div',null,'map fixture');}}, './RecordedScene':{RecordedScene:()=>React.createElement('div',null,'scene fixture')}});
+const {ReplayLab} = compile(await readFile(new URL('../src/replay/ReplayLab.tsx',import.meta.url),'utf8'), {'react':React, 'react/jsx-runtime':jsx, './data':engine, './presentation':presentation, './ValidationPanel':panel, '../components/MapView':{MapView:props=>{mapProps=props;return React.createElement('div',null,'map fixture');}}, '../site/release':compile(await readFile(new URL('../src/site/release.ts',import.meta.url),'utf8')), './RecordedScene':{RecordedScene:()=>React.createElement('div',null,'scene fixture')}});
 // Synthetic UI fixture; never served as an experiment record.
 const ui = {...fixture, trusted:true, pixels:new Uint8Array([255]), scans:[], manifest:{...fixture.manifest, scene:{width:1,height:1,resolution_m:.05,origin:[0,0,0],free_threshold:.196,occupied_threshold:.65,negate:0},metrics:[{name:'mission_ros_seconds',value:20.668,unit:'s',quality:'ORIGINAL_VERIFIED',source_ref:'report',pointer:'/campaign/trials/0/evidence/metrics/mission_ros_seconds'},{name:'odom_path_metres',value:1.5568730774647175,unit:'m'},{name:'xy_error_m',value:.15552255266952078,unit:'m'}], original_validation:{ros_outcome:'succeeded',pose_verdict:'POSE_VERIFIED',contact_verdict:'NO_CONTACT_OBSERVED',final_localized_pose:{x:0,y:0,yaw:0},final_pose_ros_ns:'12000000000',contact_frame_count:417,contact_scope:'ADAPTER_MONITORED_GEOMETRY_ONLY'}, coverage:{gaps:[],missing_channels:[]},limitations:[]}};
-test('rendered layout starts paused with real sample; player precedes visuals; private/read-only and critical limits remain visible', ()=> {
-  const html=renderToStaticMarkup(React.createElement(ReplayLab,{data:ui}));
+test('rendered layout starts paused with real sample; player precedes visuals; read-only and critical limits remain visible', ()=> {
+  const html=renderToStaticMarkup(React.createElement(ReplayLab,{data:ui,between:React.createElement('section',{id:'compare'},'between fixture')}));
   assert(html.indexOf('class="player"')<html.indexOf('class="workspace"'));
+  assert(html.indexOf('id="replay"')<html.indexOf('id="compare"') && html.indexOf('id="compare"')<html.indexOf('id="evidence"'));
+  assert.doesNotMatch(html,/<h1/); assert.match(html,/Check N0 yourself/); assert.match(html,/ORIGINAL RECORDED EVIDENCE · UNCHANGED/); assert.match(html,/YOUR CALCULATION/);
+  assert(html.indexOf('id="originals-title"')<html.indexOf('id="validation-title"'));
   assert.match(html,/00:06.0/); assert.match(html,/>Play<| Play<\/button>/);
-  assert.match(html,/Private local preview/); assert.match(html,/Recorded · Read-only · N0/); assert.match(html,/Partial recording/); assert.match(html,/LiDAR unavailable/);
+  assert.match(html,/Recorded · Read-only · N0/); assert.match(html,/Partial recording/); assert.match(html,/LiDAR unavailable/);
   assert.equal((html.match(/<details/g)||[]).length,4); assert.doesNotMatch(html,/<details[^>]* open/);
   assert.match(html,/20.67/); assert.match(html,/1.56/); assert.match(html,/15.6/); assert.match(html,/1.5568730774647175/);
   assert.equal(mapProps.readOnly,true); assert.equal(mapProps.snapshot.runtime_mode,'replay'); assert.deepEqual(mapProps.selectedGoal,null);
@@ -57,4 +60,26 @@ test('three fixed-unit criteria and explicit Run checks follow the visual worksp
   assert.match(html,/Run checks/); assert.match(html,/Inputs use seconds, metres and radians only/);
   assert(html.indexOf('class="workspace"')<html.indexOf('id="validation-title"'));
   assert.match(html,/Preview starts at a recorded moment with a reliable pose/);
+});
+
+test('playback elapsed time survives deferred state updaters (real-time 1× speed)', () => {
+  // React may run a functional updater after later frames; emulate that worst case.
+  const clock = presentation.frameClock(1000), queued = [];
+  for (let now = 1016; now <= 4000; now += 16) { const elapsed = clock(now); queued.push(t => t + elapsed); }
+  const t = queued.reduce((value, update) => update(value), 0);
+  assert(Math.abs(t - 2.992) < 1e-9, `advanced ${t} s for 2.992 s of frames`);
+  assert.equal(presentation.frameClock(5)(4), 0); // never negative
+  // The previous pattern read a shared timestamp inside the updater: deferred evaluation lost time.
+  let previous = 1000; const broken = [];
+  for (let now = 1016; now <= 4000; now += 16) { broken.push(t => t + (now - previous) / 1000); previous = now; }
+  assert(broken.reduce((value, update) => update(value), 0) < 0.1);
+});
+
+test('map wheel zoom uses a non-passive native listener and named controls', async () => {
+  // React attaches wheel listeners as passive; preventDefault there is ignored and logs errors.
+  const source = await readFile(new URL('../src/components/MapView.tsx', import.meta.url), 'utf8');
+  assert.match(source, /addEventListener\("wheel", wheel, \{ passive: false \}\)/);
+  assert.match(source, /removeEventListener\("wheel", wheel\)/);
+  assert.doesNotMatch(source, /onWheel=/);
+  for (const name of ['Zoom in', 'Zoom out', 'Fit map to view']) assert(source.includes(`aria-label="${name}"`), name);
 });

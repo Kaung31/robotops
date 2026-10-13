@@ -1,0 +1,1946 @@
+{
+  "PoseChunk": {
+    "$defs": {
+      "Pose": {
+        "additionalProperties": false,
+        "properties": {
+          "anchor": {
+            "$ref": "#/$defs/Ref"
+          },
+          "frame": {
+            "const": "map",
+            "default": "map",
+            "title": "Frame",
+            "type": "string"
+          },
+          "offset_us": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "title": "Offset Us",
+            "type": "integer"
+          },
+          "quality": {
+            "enum": [
+              "SUPPORTED_TF",
+              "TF_UNAVAILABLE"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Ros Ns",
+            "type": "string"
+          },
+          "segment_id": {
+            "anyOf": [
+              {
+                "pattern": "^[a-zA-Z0-9_-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segment Id"
+          },
+          "source_kind": {
+            "const": "localized_tf",
+            "default": "localized_tf",
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "tf_refs": {
+            "items": {
+              "$ref": "#/$defs/Ref"
+            },
+            "title": "Tf Refs",
+            "type": "array"
+          },
+          "transform": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Transform"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "segment_id",
+          "ros_ns",
+          "offset_us",
+          "transform",
+          "quality",
+          "anchor",
+          "tf_refs"
+        ],
+        "title": "Pose",
+        "type": "object"
+      },
+      "Ref": {
+        "additionalProperties": false,
+        "properties": {
+          "cdr_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Cdr Sha256",
+            "type": "string"
+          },
+          "ordinal": {
+            "minimum": 1,
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Ros Ns",
+            "type": "string"
+          },
+          "source_ref": {
+            "const": "mcap",
+            "default": "mcap",
+            "title": "Source Ref",
+            "type": "string"
+          },
+          "topic": {
+            "enum": [
+              "/tf",
+              "/tf_static",
+              "/odom",
+              "/scan"
+            ],
+            "title": "Topic",
+            "type": "string"
+          },
+          "transform_index": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Transform Index"
+          }
+        },
+        "required": [
+          "topic",
+          "ordinal",
+          "ros_ns",
+          "cdr_sha256"
+        ],
+        "title": "Ref",
+        "type": "object"
+      },
+      "Transform": {
+        "additionalProperties": false,
+        "properties": {
+          "position": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Position",
+            "type": "array"
+          },
+          "quaternion": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "title": "Quaternion",
+            "type": "array"
+          }
+        },
+        "required": [
+          "position",
+          "quaternion"
+        ],
+        "title": "Transform",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "kind": {
+        "const": "robotops.playback_poses",
+        "default": "robotops.playback_poses",
+        "title": "Kind",
+        "type": "string"
+      },
+      "samples": {
+        "items": {
+          "$ref": "#/$defs/Pose"
+        },
+        "title": "Samples",
+        "type": "array"
+      },
+      "schema_version": {
+        "const": 1,
+        "default": 1,
+        "title": "Schema Version",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "samples"
+    ],
+    "title": "PoseChunk",
+    "type": "object"
+  },
+  "ScanChunk": {
+    "$defs": {
+      "Ref": {
+        "additionalProperties": false,
+        "properties": {
+          "cdr_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Cdr Sha256",
+            "type": "string"
+          },
+          "ordinal": {
+            "minimum": 1,
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Ros Ns",
+            "type": "string"
+          },
+          "source_ref": {
+            "const": "mcap",
+            "default": "mcap",
+            "title": "Source Ref",
+            "type": "string"
+          },
+          "topic": {
+            "enum": [
+              "/tf",
+              "/tf_static",
+              "/odom",
+              "/scan"
+            ],
+            "title": "Topic",
+            "type": "string"
+          },
+          "transform_index": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Transform Index"
+          }
+        },
+        "required": [
+          "topic",
+          "ordinal",
+          "ros_ns",
+          "cdr_sha256"
+        ],
+        "title": "Ref",
+        "type": "object"
+      },
+      "Scan": {
+        "additionalProperties": false,
+        "properties": {
+          "anchor": {
+            "$ref": "#/$defs/Ref"
+          },
+          "angle_increment_rad": {
+            "title": "Angle Increment Rad",
+            "type": "number"
+          },
+          "angle_min_rad": {
+            "title": "Angle Min Rad",
+            "type": "number"
+          },
+          "base_lidar": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Transform"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "frame": {
+            "const": "lidar_link",
+            "default": "lidar_link",
+            "title": "Frame",
+            "type": "string"
+          },
+          "map_base": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Transform"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "map_quality": {
+            "enum": [
+              "SUPPORTED_TF",
+              "TF_UNAVAILABLE"
+            ],
+            "title": "Map Quality",
+            "type": "string"
+          },
+          "offset_us": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "title": "Offset Us",
+            "type": "integer"
+          },
+          "original_ray_count": {
+            "const": 360,
+            "default": 360,
+            "title": "Original Ray Count",
+            "type": "integer"
+          },
+          "range_max_m": {
+            "title": "Range Max M",
+            "type": "number"
+          },
+          "range_min_m": {
+            "title": "Range Min M",
+            "type": "number"
+          },
+          "ranges_m": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Ranges M",
+            "type": "array"
+          },
+          "ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Ros Ns",
+            "type": "string"
+          },
+          "segment_id": {
+            "anyOf": [
+              {
+                "pattern": "^[a-zA-Z0-9_-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segment Id"
+          },
+          "selected_indices": {
+            "items": {
+              "exclusiveMaximum": 360,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "title": "Selected Indices",
+            "type": "array"
+          },
+          "tf_refs": {
+            "items": {
+              "$ref": "#/$defs/Ref"
+            },
+            "title": "Tf Refs",
+            "type": "array"
+          },
+          "validity": {
+            "items": {
+              "enum": [
+                "valid",
+                "no_return",
+                "invalid_nan",
+                "out_of_bounds"
+              ],
+              "type": "string"
+            },
+            "title": "Validity",
+            "type": "array"
+          }
+        },
+        "required": [
+          "segment_id",
+          "ros_ns",
+          "offset_us",
+          "angle_min_rad",
+          "angle_increment_rad",
+          "range_min_m",
+          "range_max_m",
+          "selected_indices",
+          "ranges_m",
+          "validity",
+          "map_base",
+          "base_lidar",
+          "map_quality",
+          "anchor",
+          "tf_refs"
+        ],
+        "title": "Scan",
+        "type": "object"
+      },
+      "Transform": {
+        "additionalProperties": false,
+        "properties": {
+          "position": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Position",
+            "type": "array"
+          },
+          "quaternion": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "title": "Quaternion",
+            "type": "array"
+          }
+        },
+        "required": [
+          "position",
+          "quaternion"
+        ],
+        "title": "Transform",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "kind": {
+        "const": "robotops.playback_scans",
+        "default": "robotops.playback_scans",
+        "title": "Kind",
+        "type": "string"
+      },
+      "samples": {
+        "items": {
+          "$ref": "#/$defs/Scan"
+        },
+        "title": "Samples",
+        "type": "array"
+      },
+      "schema_version": {
+        "const": 1,
+        "default": 1,
+        "title": "Schema Version",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "samples"
+    ],
+    "title": "ScanChunk",
+    "type": "object"
+  },
+  "WarehouseManifest": {
+    "$defs": {
+      "Asset": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "exclusiveMinimum": 0,
+            "maximum": 1048576,
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "end_ros_ns": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Ros Ns"
+          },
+          "kind": {
+            "enum": [
+              "poses",
+              "scans",
+              "map"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "path": {
+            "pattern": "^(poses-[0-9]{3}\\.json\\.gz|scans-[0-9]{3}\\.json\\.gz|map\\.pgm\\.gz)$",
+            "title": "Path",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "start_ros_ns": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Ros Ns"
+          }
+        },
+        "required": [
+          "path",
+          "kind",
+          "bytes",
+          "sha256",
+          "start_ros_ns",
+          "end_ros_ns"
+        ],
+        "title": "Asset",
+        "type": "object"
+      },
+      "Benchmark": {
+        "additionalProperties": false,
+        "properties": {
+          "adoption": {
+            "const": "EXPLORATORY_ADOPTED_WITH_LIMITATIONS",
+            "default": "EXPLORATORY_ADOPTED_WITH_LIMITATIONS",
+            "title": "Adoption",
+            "type": "string"
+          },
+          "execution_path": {
+            "const": "NORMAL_BACKEND_CAMPAIGN",
+            "default": "NORMAL_BACKEND_CAMPAIGN",
+            "title": "Execution Path",
+            "type": "string"
+          },
+          "id": {
+            "const": "warehouse-navigation-v1",
+            "default": "warehouse-navigation-v1",
+            "title": "Id",
+            "type": "string"
+          },
+          "matrix_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Matrix Sha256",
+            "type": "string"
+          },
+          "order": {
+            "const": "AB_BA_AB",
+            "default": "AB_BA_AB",
+            "title": "Order",
+            "type": "string"
+          },
+          "pair": {
+            "maximum": 3,
+            "minimum": 1,
+            "title": "Pair",
+            "type": "integer"
+          },
+          "profile_trial": {
+            "maximum": 3,
+            "minimum": 1,
+            "title": "Profile Trial",
+            "type": "integer"
+          },
+          "qualification": {
+            "const": "NOT_QUALIFIED",
+            "default": "NOT_QUALIFIED",
+            "title": "Qualification",
+            "type": "string"
+          },
+          "slot": {
+            "enum": [
+              "W01",
+              "W02",
+              "W03",
+              "W04",
+              "W05",
+              "W06"
+            ],
+            "title": "Slot",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slot",
+          "pair",
+          "profile_trial",
+          "matrix_sha256"
+        ],
+        "title": "Benchmark",
+        "type": "object"
+      },
+      "Config": {
+        "additionalProperties": false,
+        "properties": {
+          "display_samples_are_authoritative_metrics": {
+            "const": false,
+            "default": false,
+            "title": "Display Samples Are Authoritative Metrics",
+            "type": "boolean"
+          },
+          "extrapolate": {
+            "const": false,
+            "default": false,
+            "title": "Extrapolate",
+            "type": "boolean"
+          },
+          "pose_gap_ns": {
+            "const": 100000000,
+            "default": 100000000,
+            "title": "Pose Gap Ns",
+            "type": "integer"
+          },
+          "pose_period_ns": {
+            "const": 50000000,
+            "default": 50000000,
+            "title": "Pose Period Ns",
+            "type": "integer"
+          },
+          "ray_stride": {
+            "const": 4,
+            "default": 4,
+            "title": "Ray Stride",
+            "type": "integer"
+          },
+          "scan_stride": {
+            "const": 2,
+            "default": 2,
+            "title": "Scan Stride",
+            "type": "integer"
+          },
+          "tf_bracket_gap_ns": {
+            "const": 250000000,
+            "default": 250000000,
+            "title": "Tf Bracket Gap Ns",
+            "type": "integer"
+          }
+        },
+        "title": "Config",
+        "type": "object"
+      },
+      "ExporterWarehouse": {
+        "additionalProperties": false,
+        "properties": {
+          "code_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Code Sha256",
+            "type": "string"
+          },
+          "config": {
+            "$ref": "#/$defs/Config"
+          },
+          "config_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Config Sha256",
+            "type": "string"
+          },
+          "version": {
+            "const": "warehouse.v1",
+            "default": "warehouse.v1",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code_sha256",
+          "config_sha256",
+          "config"
+        ],
+        "title": "ExporterWarehouse",
+        "type": "object"
+      },
+      "Gap": {
+        "additionalProperties": false,
+        "properties": {
+          "end_ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "End Ros Ns",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "UNRECORDED_HEAD",
+              "UNRECORDED_TAIL",
+              "TF_UNAVAILABLE",
+              "POSE_GAP",
+              "DISPLAY_POSE_HEAD",
+              "DISPLAY_POSE_TAIL"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "start_ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Start Ros Ns",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_ros_ns",
+          "end_ros_ns",
+          "reason"
+        ],
+        "title": "Gap",
+        "type": "object"
+      },
+      "Metric": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "enum": [
+              "mission_ros_seconds",
+              "odom_path_metres",
+              "xy_error_m",
+              "yaw_error_rad"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "pointer": {
+            "pattern": "^/campaign/trials/0/evidence/(metrics|validation)/[a-z_]+$",
+            "title": "Pointer",
+            "type": "string"
+          },
+          "quality": {
+            "const": "ORIGINAL_VERIFIED",
+            "default": "ORIGINAL_VERIFIED",
+            "title": "Quality",
+            "type": "string"
+          },
+          "source_ref": {
+            "const": "report",
+            "default": "report",
+            "title": "Source Ref",
+            "type": "string"
+          },
+          "unit": {
+            "enum": [
+              "s",
+              "m",
+              "rad"
+            ],
+            "title": "Unit",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "name",
+          "value",
+          "unit",
+          "pointer"
+        ],
+        "title": "Metric",
+        "type": "object"
+      },
+      "MissionAction": {
+        "additionalProperties": false,
+        "properties": {
+          "action_name": {
+            "const": "missions/execute",
+            "default": "missions/execute",
+            "title": "Action Name",
+            "type": "string"
+          },
+          "action_type": {
+            "const": "robotops_interfaces/action/ExecuteMission",
+            "default": "robotops_interfaces/action/ExecuteMission",
+            "title": "Action Type",
+            "type": "string"
+          },
+          "event_time_ns": {
+            "default": null,
+            "title": "Event Time Ns",
+            "type": "null"
+          },
+          "nav2_execution_start_assessable": {
+            "const": false,
+            "default": false,
+            "title": "Nav2 Execution Start Assessable",
+            "type": "boolean"
+          },
+          "observer": {
+            "const": "experiment_runner",
+            "default": "experiment_runner",
+            "title": "Observer",
+            "type": "string"
+          },
+          "owner": {
+            "const": "mission_manager",
+            "default": "mission_manager",
+            "title": "Owner",
+            "type": "string"
+          },
+          "pointer": {
+            "const": "/campaign/trials/0/evidence/validation/action_status",
+            "default": "/campaign/trials/0/evidence/validation/action_status",
+            "title": "Pointer",
+            "type": "string"
+          },
+          "quality": {
+            "enum": [
+              "AVAILABLE",
+              "MISSING",
+              "INVALID",
+              "CONFLICT"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "recorded_action_stream": {
+            "const": false,
+            "default": false,
+            "title": "Recorded Action Stream",
+            "type": "boolean"
+          },
+          "runner_pointer": {
+            "const": "/trials/0/action_status",
+            "default": "/trials/0/action_status",
+            "title": "Runner Pointer",
+            "type": "string"
+          },
+          "runner_source_ref": {
+            "const": "runner_manifest",
+            "default": "runner_manifest",
+            "title": "Runner Source Ref",
+            "type": "string"
+          },
+          "scope": {
+            "const": "SAVED_MISSION_ACTION_RESULT_SNAPSHOT",
+            "default": "SAVED_MISSION_ACTION_RESULT_SNAPSHOT",
+            "title": "Scope",
+            "type": "string"
+          },
+          "source_ref": {
+            "const": "report",
+            "default": "report",
+            "title": "Source Ref",
+            "type": "string"
+          },
+          "status_name": {
+            "anyOf": [
+              {
+                "const": "STATUS_SUCCEEDED",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Name"
+          }
+        },
+        "required": [
+          "quality",
+          "status_name"
+        ],
+        "title": "MissionAction",
+        "type": "object"
+      },
+      "OriginalV2": {
+        "additionalProperties": false,
+        "properties": {
+          "action_status": {
+            "anyOf": [
+              {
+                "maximum": 6,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Action Status"
+          },
+          "action_status_reason": {
+            "enum": [
+              "AVAILABLE",
+              "MISSING",
+              "INVALID",
+              "CONFLICT"
+            ],
+            "title": "Action Status Reason",
+            "type": "string"
+          },
+          "commanded_final_goal": {
+            "$ref": "#/$defs/XYTheta"
+          },
+          "contact_count": {
+            "minimum": 0,
+            "title": "Contact Count",
+            "type": "integer"
+          },
+          "contact_end_ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Contact End Ros Ns",
+            "type": "string"
+          },
+          "contact_frame_count": {
+            "exclusiveMinimum": 0,
+            "title": "Contact Frame Count",
+            "type": "integer"
+          },
+          "contact_scope": {
+            "const": "ADAPTER_MONITORED_GEOMETRY_ONLY",
+            "default": "ADAPTER_MONITORED_GEOMETRY_ONLY",
+            "title": "Contact Scope",
+            "type": "string"
+          },
+          "contact_start_ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Contact Start Ros Ns",
+            "type": "string"
+          },
+          "contact_verdict": {
+            "const": "NO_CONTACT_OBSERVED",
+            "title": "Contact Verdict",
+            "type": "string"
+          },
+          "final_localized_pose": {
+            "$ref": "#/$defs/XYTheta"
+          },
+          "final_observed_ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Final Observed Ros Ns",
+            "type": "string"
+          },
+          "final_pose_is_playback_sample": {
+            "const": false,
+            "default": false,
+            "title": "Final Pose Is Playback Sample",
+            "type": "boolean"
+          },
+          "final_pose_ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Final Pose Ros Ns",
+            "type": "string"
+          },
+          "mission_action": {
+            "$ref": "#/$defs/MissionAction"
+          },
+          "pose_policy": {
+            "$ref": "#/$defs/Policy"
+          },
+          "pose_verdict": {
+            "const": "POSE_VERIFIED",
+            "title": "Pose Verdict",
+            "type": "string"
+          },
+          "ros_outcome": {
+            "const": "succeeded",
+            "title": "Ros Outcome",
+            "type": "string"
+          },
+          "sanitized_derivative_not_original_report": {
+            "const": true,
+            "default": true,
+            "title": "Sanitized Derivative Not Original Report",
+            "type": "boolean"
+          },
+          "source_ref": {
+            "const": "report",
+            "default": "report",
+            "title": "Source Ref",
+            "type": "string"
+          },
+          "universal_collision_freedom_assessable": {
+            "const": false,
+            "default": false,
+            "title": "Universal Collision Freedom Assessable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ros_outcome",
+          "action_status_reason",
+          "pose_verdict",
+          "pose_policy",
+          "commanded_final_goal",
+          "final_localized_pose",
+          "final_pose_ros_ns",
+          "final_observed_ros_ns",
+          "contact_verdict",
+          "contact_start_ros_ns",
+          "contact_end_ros_ns",
+          "contact_frame_count",
+          "contact_count",
+          "mission_action"
+        ],
+        "title": "OriginalV2",
+        "type": "object"
+      },
+      "Policy": {
+        "additionalProperties": false,
+        "properties": {
+          "localization_max_age_s": {
+            "title": "Localization Max Age S",
+            "type": "number"
+          },
+          "max_xy_variance_m2": {
+            "title": "Max Xy Variance M2",
+            "type": "number"
+          },
+          "max_yaw_variance_rad2": {
+            "title": "Max Yaw Variance Rad2",
+            "type": "number"
+          },
+          "tf_max_age_s": {
+            "title": "Tf Max Age S",
+            "type": "number"
+          },
+          "xy_tolerance_m": {
+            "title": "Xy Tolerance M",
+            "type": "number"
+          },
+          "yaw_tolerance_rad": {
+            "title": "Yaw Tolerance Rad",
+            "type": "number"
+          }
+        },
+        "required": [
+          "xy_tolerance_m",
+          "yaw_tolerance_rad",
+          "tf_max_age_s",
+          "localization_max_age_s",
+          "max_xy_variance_m2",
+          "max_yaw_variance_rad2"
+        ],
+        "title": "Policy",
+        "type": "object"
+      },
+      "RecorderLoss": {
+        "additionalProperties": false,
+        "properties": {
+          "accounting_complete": {
+            "const": true,
+            "title": "Accounting Complete",
+            "type": "boolean"
+          },
+          "assessment": {
+            "const": "OFFLINE_RECORDER_LOG_REVIEW",
+            "default": "OFFLINE_RECORDER_LOG_REVIEW",
+            "title": "Assessment",
+            "type": "string"
+          },
+          "log_source_ref": {
+            "const": "recorder_log",
+            "default": "recorder_log",
+            "title": "Log Source Ref",
+            "type": "string"
+          },
+          "loss_reports": {
+            "const": 0,
+            "title": "Loss Reports",
+            "type": "integer"
+          },
+          "transport_lost_messages": {
+            "const": 0,
+            "title": "Transport Lost Messages",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accounting_complete",
+          "transport_lost_messages",
+          "loss_reports"
+        ],
+        "title": "RecorderLoss",
+        "type": "object"
+      },
+      "Scene": {
+        "additionalProperties": false,
+        "properties": {
+          "coordinates": {
+            "const": "ROS_RIGHT_HANDED_METRES_Z_UP",
+            "default": "ROS_RIGHT_HANDED_METRES_Z_UP",
+            "title": "Coordinates",
+            "type": "string"
+          },
+          "encoding": {
+            "const": "P5_GRAY8_TOP_DOWN",
+            "default": "P5_GRAY8_TOP_DOWN",
+            "title": "Encoding",
+            "type": "string"
+          },
+          "frame_chain": {
+            "const": "map->odom->base_link->lidar_link",
+            "default": "map->odom->base_link->lidar_link",
+            "title": "Frame Chain",
+            "type": "string"
+          },
+          "free_threshold": {
+            "title": "Free Threshold",
+            "type": "number"
+          },
+          "height": {
+            "exclusiveMinimum": 0,
+            "title": "Height",
+            "type": "integer"
+          },
+          "map_asset": {
+            "const": "map.pgm.gz",
+            "default": "map.pgm.gz",
+            "title": "Map Asset",
+            "type": "string"
+          },
+          "negate": {
+            "const": 0,
+            "default": 0,
+            "title": "Negate",
+            "type": "integer"
+          },
+          "occupied_threshold": {
+            "title": "Occupied Threshold",
+            "type": "number"
+          },
+          "origin": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Origin",
+            "type": "array"
+          },
+          "resolution_m": {
+            "title": "Resolution M",
+            "type": "number"
+          },
+          "visual_model": {
+            "default": null,
+            "title": "Visual Model",
+            "type": "null"
+          },
+          "visual_model_reason": {
+            "const": "NO_CURATED_VISUAL_ASSET",
+            "default": "NO_CURATED_VISUAL_ASSET",
+            "title": "Visual Model Reason",
+            "type": "string"
+          },
+          "width": {
+            "exclusiveMinimum": 0,
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "width",
+          "height",
+          "resolution_m",
+          "origin",
+          "occupied_threshold",
+          "free_threshold"
+        ],
+        "title": "Scene",
+        "type": "object"
+      },
+      "Segment": {
+        "additionalProperties": false,
+        "properties": {
+          "end_ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "End Ros Ns",
+            "type": "string"
+          },
+          "end_us": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "title": "End Us",
+            "type": "integer"
+          },
+          "epoch": {
+            "const": 0,
+            "default": 0,
+            "title": "Epoch",
+            "type": "integer"
+          },
+          "frame": {
+            "const": "map",
+            "default": "map",
+            "title": "Frame",
+            "type": "string"
+          },
+          "id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,128}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "interpolate_across_segments": {
+            "const": false,
+            "default": false,
+            "title": "Interpolate Across Segments",
+            "type": "boolean"
+          },
+          "interpolate_within_max_gap_ns": {
+            "const": 100000000,
+            "default": 100000000,
+            "title": "Interpolate Within Max Gap Ns",
+            "type": "integer"
+          },
+          "start_ros_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Start Ros Ns",
+            "type": "string"
+          },
+          "start_us": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "title": "Start Us",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "start_ros_ns",
+          "end_ros_ns",
+          "start_us",
+          "end_us"
+        ],
+        "title": "Segment",
+        "type": "object"
+      },
+      "Teardown": {
+        "additionalProperties": false,
+        "description": "Post-trial stack shutdown, assessed later from the private launch log.",
+        "properties": {
+          "assessment": {
+            "const": "OFFLINE_LAUNCH_LOG_REVIEW",
+            "default": "OFFLINE_LAUNCH_LOG_REVIEW",
+            "title": "Assessment",
+            "type": "string"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "const": "After the trial's evidence was finalized and hashed, stack teardown lost its X display; gazebo_runner exited -11 (SIGSEGV) and twist_mux exited -2.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "evidence_finalized_before_teardown": {
+            "const": true,
+            "default": true,
+            "title": "Evidence Finalized Before Teardown",
+            "type": "boolean"
+          },
+          "log_association": {
+            "const": "STACK_START_PRECEDES_MISSION_SAME_SLOT",
+            "default": "STACK_START_PRECEDES_MISSION_SAME_SLOT",
+            "title": "Log Association",
+            "type": "string"
+          },
+          "log_source_ref": {
+            "const": "launch_log",
+            "default": "launch_log",
+            "title": "Log Source Ref",
+            "type": "string"
+          },
+          "original_campaign_cleanup_confirmed": {
+            "const": true,
+            "default": true,
+            "title": "Original Campaign Cleanup Confirmed",
+            "type": "boolean"
+          },
+          "original_cleanup_check_included_exit_status": {
+            "const": false,
+            "default": false,
+            "title": "Original Cleanup Check Included Exit Status",
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "NO_CHILD_FAILURE_LOGGED",
+              "CRASHED_AFTER_EVIDENCE_FINALIZED"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "detail"
+        ],
+        "title": "Teardown",
+        "type": "object"
+      },
+      "WarehouseConditions": {
+        "additionalProperties": false,
+        "properties": {
+          "campaign_repetitions": {
+            "const": 1,
+            "default": 1,
+            "title": "Campaign Repetitions",
+            "type": "integer"
+          },
+          "causal_performance_claim": {
+            "const": false,
+            "default": false,
+            "title": "Causal Performance Claim",
+            "type": "boolean"
+          },
+          "classification": {
+            "const": "EXPLORATORY_BENCHMARK_V1",
+            "default": "EXPLORATORY_BENCHMARK_V1",
+            "title": "Classification",
+            "type": "string"
+          },
+          "controlled_algorithm_ab": {
+            "const": false,
+            "default": false,
+            "title": "Controlled Algorithm Ab",
+            "type": "boolean"
+          },
+          "environment": {
+            "const": "warehouse_v1",
+            "default": "warehouse_v1",
+            "title": "Environment",
+            "type": "string"
+          },
+          "exact_localization_initial_state": {
+            "const": "UNPROVEN",
+            "default": "UNPROVEN",
+            "title": "Exact Localization Initial State",
+            "type": "string"
+          },
+          "fault_configuration": {
+            "default": null,
+            "title": "Fault Configuration",
+            "type": "null"
+          },
+          "historical_install_identity": {
+            "const": "NOT_ESTABLISHED",
+            "default": "NOT_ESTABLISHED",
+            "title": "Historical Install Identity",
+            "type": "string"
+          },
+          "host_resource_conditions": {
+            "const": "NOT_ESTABLISHED",
+            "default": "NOT_ESTABLISHED",
+            "title": "Host Resource Conditions",
+            "type": "string"
+          },
+          "map_id": {
+            "const": "warehouse_v1",
+            "default": "warehouse_v1",
+            "title": "Map Id",
+            "type": "string"
+          },
+          "map_image_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Map Image Sha256",
+            "type": "string"
+          },
+          "map_yaml_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Map Yaml Sha256",
+            "type": "string"
+          },
+          "measured_runner_start": {
+            "$ref": "#/$defs/XYTheta"
+          },
+          "parameters_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Parameters Sha256",
+            "type": "string"
+          },
+          "profile": {
+            "enum": [
+              "navfn_rpp",
+              "smac_dwb"
+            ],
+            "title": "Profile",
+            "type": "string"
+          },
+          "random_seed": {
+            "default": null,
+            "title": "Random Seed",
+            "type": "null"
+          },
+          "requested_start": {
+            "$ref": "#/$defs/XYTheta"
+          },
+          "robot_model": {
+            "const": "robotops_base",
+            "default": "robotops_base",
+            "title": "Robot Model",
+            "type": "string"
+          },
+          "software_revision": {
+            "default": null,
+            "title": "Software Revision",
+            "type": "null"
+          },
+          "start_position_tolerance_m": {
+            "minimum": 0,
+            "title": "Start Position Tolerance M",
+            "type": "number"
+          },
+          "start_yaw_tolerance_rad": {
+            "minimum": 0,
+            "title": "Start Yaw Tolerance Rad",
+            "type": "number"
+          },
+          "statistical_reliability_claim": {
+            "const": false,
+            "default": false,
+            "title": "Statistical Reliability Claim",
+            "type": "boolean"
+          },
+          "trial_index": {
+            "const": 0,
+            "default": 0,
+            "title": "Trial Index",
+            "type": "integer"
+          },
+          "waypoints": {
+            "items": {
+              "$ref": "#/$defs/XYTheta"
+            },
+            "maxItems": 5,
+            "minItems": 5,
+            "title": "Waypoints",
+            "type": "array"
+          }
+        },
+        "required": [
+          "profile",
+          "waypoints",
+          "parameters_sha256",
+          "map_yaml_sha256",
+          "map_image_sha256",
+          "requested_start",
+          "start_position_tolerance_m",
+          "start_yaw_tolerance_rad",
+          "measured_runner_start"
+        ],
+        "title": "WarehouseConditions",
+        "type": "object"
+      },
+      "WarehouseCoverage": {
+        "additionalProperties": false,
+        "properties": {
+          "full_mission_replay": {
+            "title": "Full Mission Replay",
+            "type": "boolean"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/$defs/Gap"
+            },
+            "title": "Gaps",
+            "type": "array"
+          },
+          "missing_channels": {
+            "items": {
+              "enum": [
+                "AMCL_POSE",
+                "GAZEBO_POSE_TRUTH",
+                "NAV2_ACTION_EVENTS",
+                "PLANNED_PATH",
+                "COSTMAPS",
+                "FAULT_EVENTS"
+              ],
+              "type": "string"
+            },
+            "title": "Missing Channels",
+            "type": "array"
+          },
+          "navigation_window_recorded": {
+            "const": true,
+            "default": true,
+            "title": "Navigation Window Recorded",
+            "type": "boolean"
+          },
+          "source_scans": {
+            "minimum": 0,
+            "title": "Source Scans",
+            "type": "integer"
+          },
+          "source_scans_without_map_tf": {
+            "minimum": 0,
+            "title": "Source Scans Without Map Tf",
+            "type": "integer"
+          },
+          "unavailable_scan_stamps_ns": {
+            "items": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "title": "Unavailable Scan Stamps Ns",
+            "type": "array"
+          }
+        },
+        "required": [
+          "full_mission_replay",
+          "gaps",
+          "source_scans",
+          "source_scans_without_map_tf",
+          "unavailable_scan_stamps_ns",
+          "missing_channels"
+        ],
+        "title": "WarehouseCoverage",
+        "type": "object"
+      },
+      "WarehouseIdentity": {
+        "additionalProperties": false,
+        "properties": {
+          "campaign_id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,128}$",
+            "title": "Campaign Id",
+            "type": "string"
+          },
+          "environment": {
+            "const": "warehouse_v1",
+            "title": "Environment",
+            "type": "string"
+          },
+          "experiment_id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,128}$",
+            "title": "Experiment Id",
+            "type": "string"
+          },
+          "map_id": {
+            "const": "warehouse_v1",
+            "title": "Map Id",
+            "type": "string"
+          },
+          "mode": {
+            "const": "sim",
+            "default": "sim",
+            "title": "Mode",
+            "type": "string"
+          },
+          "original_config_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Original Config Sha256",
+            "type": "string"
+          },
+          "original_parameters_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Original Parameters Sha256",
+            "type": "string"
+          },
+          "profile": {
+            "enum": [
+              "navfn_rpp",
+              "smac_dwb"
+            ],
+            "title": "Profile",
+            "type": "string"
+          },
+          "report_id": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Report Id",
+            "type": "string"
+          },
+          "robot_model": {
+            "const": "robotops_base",
+            "title": "Robot Model",
+            "type": "string"
+          },
+          "run_id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,128}$",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "software_revision": {
+            "default": null,
+            "title": "Software Revision",
+            "type": "null"
+          },
+          "software_revision_reason": {
+            "const": "UNAVAILABLE_IN_ORIGINAL",
+            "default": "UNAVAILABLE_IN_ORIGINAL",
+            "title": "Software Revision Reason",
+            "type": "string"
+          },
+          "trial_id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,128}$",
+            "title": "Trial Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "campaign_id",
+          "experiment_id",
+          "trial_id",
+          "run_id",
+          "report_id",
+          "robot_model",
+          "environment",
+          "profile",
+          "map_id",
+          "original_config_sha256",
+          "original_parameters_sha256"
+        ],
+        "title": "WarehouseIdentity",
+        "type": "object"
+      },
+      "WarehouseSource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,128}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "integrity": {
+            "const": "VERIFIED",
+            "default": "VERIFIED",
+            "title": "Integrity",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "report",
+              "mcap",
+              "run_metadata",
+              "run_result",
+              "bag_metadata",
+              "runner_manifest",
+              "contacts",
+              "map_yaml",
+              "map_image",
+              "matrix",
+              "recorder_log",
+              "launch_log"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "original_bound",
+              "audit_snapshot_only",
+              "private_log_not_exported"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "sha256",
+          "scope"
+        ],
+        "title": "WarehouseSource",
+        "type": "object"
+      },
+      "WarehouseTime": {
+        "additionalProperties": false,
+        "properties": {
+          "dispatch_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Dispatch Ns",
+            "type": "string"
+          },
+          "domain": {
+            "const": "recorded_ros_simulation",
+            "default": "recorded_ros_simulation",
+            "title": "Domain",
+            "type": "string"
+          },
+          "epoch": {
+            "const": 0,
+            "default": 0,
+            "title": "Epoch",
+            "type": "integer"
+          },
+          "final_observation_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Final Observation Ns",
+            "type": "string"
+          },
+          "mission_end_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Mission End Ns",
+            "type": "string"
+          },
+          "mission_start_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Mission Start Ns",
+            "type": "string"
+          },
+          "offset_origin_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Offset Origin Ns",
+            "type": "string"
+          },
+          "recorded_end_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Recorded End Ns",
+            "type": "string"
+          },
+          "recorded_start_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Recorded Start Ns",
+            "type": "string"
+          },
+          "result_finalized_ns": {
+            "pattern": "^[0-9]+$",
+            "title": "Result Finalized Ns",
+            "type": "string"
+          },
+          "wall_mapping": {
+            "default": null,
+            "title": "Wall Mapping",
+            "type": "null"
+          }
+        },
+        "required": [
+          "mission_start_ns",
+          "mission_end_ns",
+          "result_finalized_ns",
+          "dispatch_ns",
+          "final_observation_ns",
+          "recorded_start_ns",
+          "recorded_end_ns",
+          "offset_origin_ns"
+        ],
+        "title": "WarehouseTime",
+        "type": "object"
+      },
+      "XYTheta": {
+        "additionalProperties": false,
+        "properties": {
+          "x": {
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "title": "Y",
+            "type": "number"
+          },
+          "yaw": {
+            "title": "Yaw",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "yaw"
+        ],
+        "title": "XYTheta",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "assets": {
+        "items": {
+          "$ref": "#/$defs/Asset"
+        },
+        "title": "Assets",
+        "type": "array"
+      },
+      "benchmark": {
+        "$ref": "#/$defs/Benchmark"
+      },
+      "conditions": {
+        "$ref": "#/$defs/WarehouseConditions"
+      },
+      "coverage": {
+        "$ref": "#/$defs/WarehouseCoverage"
+      },
+      "dataset_id": {
+        "enum": [
+          "W01",
+          "W02",
+          "W03",
+          "W04",
+          "W05",
+          "W06"
+        ],
+        "title": "Dataset Id",
+        "type": "string"
+      },
+      "exporter": {
+        "$ref": "#/$defs/ExporterWarehouse"
+      },
+      "kind": {
+        "const": "robotops.recorded_playback",
+        "default": "robotops.recorded_playback",
+        "title": "Kind",
+        "type": "string"
+      },
+      "limitations": {
+        "items": {
+          "enum": [
+            "EXPLORATORY_BENCHMARK_NOT_QUALIFIED",
+            "THREE_TRIALS_PER_CONFIGURATION",
+            "PROFILE_BUNDLES_NOT_SINGLE_ALGORITHMS",
+            "SINGLE_WORLD_AND_START",
+            "SIMULATION_TIME_ONE_HOST",
+            "LOCALIZED_TF_NOT_PHYSICAL_TRUTH",
+            "NO_NAV2_EVENT_RECONSTRUCTION",
+            "DISPLAY_DOWNSAMPLED",
+            "NO_ORIGINAL_GIT_REVISION",
+            "HASHES_NOT_SIGNATURES",
+            "SCOPED_CONTACT_OBSERVATION_ONLY",
+            "TEARDOWN_CRASH_AFTER_FINALIZATION"
+          ],
+          "type": "string"
+        },
+        "title": "Limitations",
+        "type": "array"
+      },
+      "metrics": {
+        "items": {
+          "$ref": "#/$defs/Metric"
+        },
+        "title": "Metrics",
+        "type": "array"
+      },
+      "navigation_events": {
+        "items": {
+          "type": "null"
+        },
+        "maxItems": 0,
+        "title": "Navigation Events",
+        "type": "array"
+      },
+      "original_report_limitations": {
+        "items": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^[^/\\\\<>]*$",
+          "type": "string"
+        },
+        "maxItems": 20,
+        "minItems": 1,
+        "title": "Original Report Limitations",
+        "type": "array"
+      },
+      "original_validation": {
+        "$ref": "#/$defs/OriginalV2"
+      },
+      "publication_review": {
+        "const": "PRIVATE_NOT_APPROVED_FOR_UPLOAD",
+        "default": "PRIVATE_NOT_APPROVED_FOR_UPLOAD",
+        "title": "Publication Review",
+        "type": "string"
+      },
+      "recorder_loss": {
+        "$ref": "#/$defs/RecorderLoss"
+      },
+      "scene": {
+        "$ref": "#/$defs/Scene"
+      },
+      "schema_version": {
+        "const": 3,
+        "default": 3,
+        "title": "Schema Version",
+        "type": "integer"
+      },
+      "segments": {
+        "items": {
+          "$ref": "#/$defs/Segment"
+        },
+        "title": "Segments",
+        "type": "array"
+      },
+      "source_identity": {
+        "$ref": "#/$defs/WarehouseIdentity"
+      },
+      "source_trial_index": {
+        "const": 0,
+        "default": 0,
+        "title": "Source Trial Index",
+        "type": "integer"
+      },
+      "sources": {
+        "items": {
+          "$ref": "#/$defs/WarehouseSource"
+        },
+        "title": "Sources",
+        "type": "array"
+      },
+      "teardown": {
+        "$ref": "#/$defs/Teardown"
+      },
+      "time": {
+        "$ref": "#/$defs/WarehouseTime"
+      }
+    },
+    "required": [
+      "dataset_id",
+      "exporter",
+      "source_identity",
+      "sources",
+      "assets",
+      "time",
+      "segments",
+      "coverage",
+      "scene",
+      "metrics",
+      "original_validation",
+      "original_report_limitations",
+      "conditions",
+      "benchmark",
+      "teardown",
+      "recorder_loss",
+      "limitations"
+    ],
+    "title": "WarehouseManifest",
+    "type": "object"
+  }
+}

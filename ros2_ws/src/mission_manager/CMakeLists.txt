@@ -11,7 +11,8 @@ install(
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(mission_validation test/test_mission_validation.py)
-  ament_add_pytest_test(recording_preparation test/test_recording_preparation.py)
+  ament_add_pytest_test(recording_preparation
+                        test/test_recording_preparation.py)
   ament_add_pytest_test(mission_integration test/mission_integration.py TIMEOUT
                         240 ENV ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST)
   ament_add_pytest_test(mission_launch_validation
