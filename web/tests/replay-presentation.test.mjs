@@ -71,3 +71,12 @@ test('playback elapsed time survives deferred state updaters (real-time 1× spee
   for (let now = 1016; now <= 4000; now += 16) { broken.push(t => t + (now - previous) / 1000); previous = now; }
   assert(broken.reduce((value, update) => update(value), 0) < 0.1);
 });
+
+test('map wheel zoom uses a non-passive native listener and named controls', async () => {
+  // React attaches wheel listeners as passive; preventDefault there is ignored and logs errors.
+  const source = await readFile(new URL('../src/components/MapView.tsx', import.meta.url), 'utf8');
+  assert.match(source, /addEventListener\("wheel", wheel, \{ passive: false \}\)/);
+  assert.match(source, /removeEventListener\("wheel", wheel\)/);
+  assert.doesNotMatch(source, /onWheel=/);
+  for (const name of ['Zoom in', 'Zoom out', 'Fit map to view']) assert(source.includes(`aria-label="${name}"`), name);
+});

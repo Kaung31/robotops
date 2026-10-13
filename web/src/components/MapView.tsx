@@ -1,4 +1,4 @@
-import { PointerEvent, WheelEvent, useEffect, useMemo, useRef, useState } from "react";
+import { PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Pose2D, RobotSnapshot } from "../lib/types";
 
 interface Props {
@@ -282,14 +282,22 @@ export function MapView({ snapshot, selectedGoal, onGoalSelect, trajectory = [],
     event.currentTarget.releasePointerCapture(event.pointerId);
   }
 
-  function wheel(event: WheelEvent<HTMLCanvasElement>) {
-    event.preventDefault();
-    const factor = event.deltaY < 0 ? 1.15 : 1 / 1.15;
-    setViewport((value) => ({
-      ...value,
-      zoom: Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value.zoom * factor)),
-    }));
-  }
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    // React registers wheel listeners as passive, so preventDefault would be ignored
+    // and the page would scroll while zooming. Listen natively instead.
+    const wheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const factor = event.deltaY < 0 ? 1.15 : 1 / 1.15;
+      setViewport((value) => ({
+        ...value,
+        zoom: Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value.zoom * factor)),
+      }));
+    };
+    canvas.addEventListener("wheel", wheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", wheel);
+  }, []);
 
   return (
     <div className="map-view" ref={containerRef}>
@@ -301,7 +309,6 @@ export function MapView({ snapshot, selectedGoal, onGoalSelect, trajectory = [],
         onPointerMove={pointerMove}
         onPointerUp={pointerUp}
         onPointerCancel={() => { drag.current = null; }}
-        onWheel={wheel}
       />
       <div className="map-toolbar" aria-label="Map controls">
         <button className="map-tool" aria-label="Zoom in" onClick={() => setViewport((v) => ({ ...v, zoom: Math.min(MAX_ZOOM, v.zoom * 1.25) }))}>+</button>
