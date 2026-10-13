@@ -1,7 +1,7 @@
 # Final website source integration — 2026-10-13
 
 **Local verification PASS; hosted CI pending on the final pushed revision.**
-Owner-approved integration of the five reviewed website commits into the corrected
+Owner-approved integration of the six reviewed website commits into the corrected
 clean publication source. No merge, deployment, dataset upload, new licence choice,
 robotics workload or manual robotics workflow dispatch.
 
@@ -19,11 +19,12 @@ commit and hosted results are recorded in the owner handoff.
 | `bd21aa0e113ec001c2c60935838bd72582b40cd6` | `827b83a949b899755645d22cb93302a7762ddc49` |
 | `4e9af619eecbc1d0c2adfd8dffd36db05515e26f` | `16b8172b377fa9c0faac4580524724306c80e99b` |
 | `8544cfd2cb9cc4cdc1bee48d3947ffdc52d3d668` | `d1751a82de682e413d22425e05925ca2bcb2e448` |
+| `d7cae95035fcd679896cd2237c6c23244627e63c` | `6e0ed9d40a23a7777a99bcc9ab520525ab11c6b1` |
 
-All five patches applied without textual conflict. Range-diff preserves the first
+All six patches applied without textual conflict. Range-diff preserves the first
 four patches exactly; the fifth's NOTICE context differs because the corrected
 source-provenance declaration is retained. All **92 files under web/** match
-accepted Claude revision `8544cfd` byte-for-byte, including source, tests, release
+accepted Claude revision `d7cae95` byte-for-byte, including source, tests, release
 metadata, lockfile and build scripts. Current-status and website-plan changes are
 also included. The reconstructed YAML, ROS/backend production code, frozen matrix,
 campaign definitions, recording profiles, benchmark result table, reproduction
@@ -40,8 +41,15 @@ reports remain historical records rather than being rewritten.
 
 ## Reproduced private launch build
 
-The accepted launch inventory contains **235 files / 8,190,310 bytes**. Its inventory
-SHA-256 is `5113fce82b1bdddbf410fcae8acd6548833d740bbc7f7ca20cfcdbc6a24146a3`.
+The accepted launch inventory contains **235 files / 8,191,836 bytes**. Its inventory
+SHA-256 is `49cb5e59d4d1475ddc93c4c21c9548991cf911fe23c690e406a0c51e25e34794`.
+The SHA-256 of `site-final.SHA256SUMS` is
+`ae8fc4420836c08dceb1b2061fd3ea31425b83cba0f03daebd52a4b2bbf7aca3`.
+The original package was accessible: all 235 files were verified against both its
+checksum list and inventory. A fresh build using the real private release inputs
+reproduced all 235 files and the inventory byte-for-byte. Only `robots.txt` and
+`THIRD_PARTY_NOTICES.txt` differ from the previous accepted launch package.
+
 The rebuilt private stage has exactly the same path inventory and every file is
 byte-identical, including hashed JS/CSS names, HTML, notices, licence/release
 metadata, and all existing bundle bytes. There are 15 site-code/configuration files
@@ -55,7 +63,32 @@ requires no private recordings. The accepted homepage's 110-point W01 route
 illustration and benchmark summary constants are reviewed website source; tests
 re-derive them from the pinned copied datasets. Full replay bundles remain private.
 
-## Actual local checks
+## Final patch verification
+
+The prepared handoff patch applied directly above `cd7952a`, without importing
+unpublished ancestors. It changes only `web/scripts/finalize-site.mjs`,
+`web/scripts/stage-release.mjs` and `web/tests/portfolio-release.test.mjs`.
+Public indexing is now permitted by robots.txt. The generated third-party notice
+includes the MIT copyright and permission text for the bundled Rollup CommonJS
+helper, extracted from the installed, locked Vite licence. No root NOTICE or
+dataset licence decision changed. This integration report is the only additional
+tracked documentation correction.
+
+The source-only frontend passed 79 tests with 8 expected private-data skips; the
+real-fixture suite passed all 124 tests. Typecheck and all three production builds
+passed. Complete web source matches `d7cae95`; all tracked paths outside web and
+this report remain identical to `cd7952a`, including reconstructed navigation,
+recording profiles, frozen benchmarks and historical reproduction instructions.
+
+The final patch also passed static checks, portable Python (404 passed, 3 expected
+ROS-dependent skips), 8 CI helper tests and scoped Pyright (zero errors). The first
+host-shell lint attempt lacked container-installed Python modules; rerunning in
+the configured Jazzy container passed without changing source or requirements.
+The new preservation snapshot matches all 1,144 developer source files, all
+27,042 original artifact/archive metadata entries and all 244 guard hashes.
+Hosted CI on the final pushed revision is reported separately in the owner handoff.
+
+## Earlier integration local checks
 
 | Check | Result |
 | --- | --- |
@@ -91,7 +124,7 @@ no credentials, actual machine/worktree paths, original MCAP, execution artifact
 or private dataset bundles may be included. Only explicitly reviewed site figure,
 summary constants and release metadata are carried as website source.
 
-Before/after checks match all three existing developer worktree HEADs, branches,
+Earlier integration before/after checks matched all three existing developer worktree HEADs, branches,
 indices, source-file hashes and statuses (1144 files). All 26,799 protected original
 artifact/archive metadata entries and all 244 guard hashes/identities match. The
 three pending W3 harness edits remain untouched and excluded; original recordings,
