@@ -125,5 +125,7 @@ checks rejection of the frozen matrix against reconstructed bytes. The normal
 campaign service does not call that historical matrix validator and continues to
 use the unchanged composer and recording profiles.
 
-Dataset licence remains unassigned; no dataset publication is approved here.
+The accepted website release metadata records the owner-approved CC BY 4.0
+decision for the eight pinned derived bundles. This source integration does not
+select a new licence, change bundle bytes, or authorise dataset publication.
 Q1 remains **INCONCLUSIVE / RECOVERY UNKNOWN**.

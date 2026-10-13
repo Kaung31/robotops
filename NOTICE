@@ -53,3 +53,6 @@ licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/ . The
 licence text is web/release-config/DATA-LICENSE.txt. Raw MCAP recordings, logs,
 campaign databases and full reports are not published and are not licensed by
 this notice. The source code licence (Apache-2.0) does not cover the datasets.
+
+Dataset bundles are not included in this source repository. The release metadata
+records the accepted licence decision; it does not authorise deployment or upload.
