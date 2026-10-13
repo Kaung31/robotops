@@ -25,6 +25,12 @@ NavFn + RPP finished with a much tighter heading (≈3° vs ≈11°). **Neither 
 the 1.2 m aisles between the racks; both drove around the rack block, so v1 shows
 no narrow-aisle navigation capability.**
 
+**Historical configuration boundary:** W01–W06 are bound to the frozen matrix's
+original raw configuration hashes. The reconstructed navigation YAML preserves
+effective parameters but has different bytes and cannot replace those files in
+the original matrix. A campaign using this checkout is a new run, not a reproduction
+of W01–W06. See [reproduction limits](docs/WAREHOUSE_BENCHMARK.md#reproduce).
+
 - [Architecture](docs/ARCHITECTURE.md) and [documentation index](docs/README.md)
 - [Mapping](docs/MAPPING.md), [navigation](docs/NAVIGATION.md),
   [missions](docs/MISSIONS.md), [experiments](docs/EXPERIMENTS.md)
@@ -174,18 +180,21 @@ Use `ruff format .`, `clang-format -i` on C++ files and `cmake-format -i` on pac
 to format. The portable suite checks expanded model contracts and invalid input;
 ROS launch tests are registered separately with CMake and run through colcon.
 The C++ command guard is built with compiler warnings and GTest coverage through
-colcon. The web frontend is TypeScript and is type-checked/built in its own CI job. A project-wide
-Python static type-checker is not configured yet.
+colcon. The web frontend is TypeScript and is type-checked/built in its own CI job.
+Scoped Python type checking is configured in `pyrightconfig.json`.
 
-GitHub Actions runs portable checks on Ubuntu 24.04/Python 3.12 and a separate
-set of Jazzy jobs: mock/package tests, headless Gazebo control, and a separate
-software-rendered mapping-save-restart-localization test, and two-profile autonomous
-navigation, a recorded two-waypoint mission and repeated recorded experiments. The Jazzy full-stack jobs explicitly use Cyclone DDS so CI does not depend on the known Fast DDS response-delivery race seen in the archived baseline.
-All build from the package manifests; installed-resource validation, ROS
-TF/QoS checks and shutdown checks are included. Portable tests use pinned PyPI Xacro; the ROS job uses Jazzy's
-Xacro. Keep a portable venv deactivated when building/testing ROS. When running portable
-checks from a ROS-sourced shell, unset `PYTHONPATH` first to avoid mixing ROS
-Python packages into the isolated venv.
+Ordinary pull-request CI has three jobs: Python/static checks, frontend tests and
+builds, and a Jazzy build with an explicit passive package-test allowlist. These
+jobs need no private recordings and start no ROS/Gazebo workloads. The separate
+[robotics integration workflow](.github/workflows/robotics-integration.yml) is
+manual-only; it retains mock, simulation, mapping, navigation, mission and experiment
+suites. Opening a PR does not dispatch it. Local verification scope and outstanding
+hosted validation are recorded in [the remediation report](docs/PUBLICATION_REMEDIATION_REPORT.md).
+
+Portable tests use pinned PyPI Xacro; the ROS job uses Jazzy's Xacro. Keep a
+portable venv deactivated when building/testing ROS. When running portable checks
+from a ROS-sourced shell, unset `PYTHONPATH` first to avoid mixing ROS packages
+into the isolated venv.
 
 ## License
 
@@ -195,8 +204,8 @@ and replay datasets are not part of the source release.
 
 ## Before publication
 
-The package manifests still use a placeholder maintainer address, and this
-directory has no Git metadata or remote yet. Neither blocks local simulation work.
+The package manifests still use a placeholder maintainer address. Source-only
+publication excludes recordings and replay datasets; it does not deploy a live lab.
 
 See the [Milestone 6 verification record](docs/plans/milestone-6.md) for current
 build/test results. Hosted Actions and interactive GUI review are not verified.

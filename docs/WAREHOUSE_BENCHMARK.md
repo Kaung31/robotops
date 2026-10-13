@@ -108,8 +108,25 @@ accounting, and AMCL within 7.4 cm and 0.037 rad of simulator ground truth acros
 
 ## Reproduce
 
-From a sourced Jazzy workspace, start the backend with campaign execution enabled
-(see [EXPERIMENTS.md](EXPERIMENTS.md)), then submit each slot:
+W01–W06 retain the original raw source/configuration hashes in the frozen matrix
+and original evidence. The current navigation YAML was reconstructed offline:
+its effective parameter values are unchanged, but its raw bytes/hashes differ.
+It **cannot be substituted into the original frozen matrix**. Strict validation
+of that matrix against the current checkout correctly fails; do not rewrite its
+pins or bypass validation to make it pass.
+
+Historical inspection/reproduction requires the matching original configuration
+bytes and preserved private map/evidence inputs. Git history retains the old YAML;
+that alone does not recover the exact runtime: the trials used `ebdb551` plus
+uncommitted changes, and their software revision was not recorded. No exact full
+runtime reproduction is claimed. See [configuration provenance](CONFIGURATION_PROVENANCE.md).
+
+The API steps below describe a **new normal campaign run**, with its own software
+and configuration identity, rather than a replay or reproduction of the six
+historical outcomes. A new benchmark specification must have a separately reviewed
+identity; the frozen v1 matrix and reports stay unchanged. From a sourced Jazzy
+workspace, start the backend with campaign execution enabled
+(see [EXPERIMENTS.md](EXPERIMENTS.md)), then submit a slot definition:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/campaigns -H 'Content-Type: application/json' -H 'Idempotency-Key: W01-run1' --data @benchmarks/warehouse_v1/campaigns/W01.json
