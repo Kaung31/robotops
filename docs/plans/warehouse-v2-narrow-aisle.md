@@ -202,8 +202,8 @@ INCONCLUSIVE evidence, which counts for neither configuration. Proposed sequence
    planner statements are model-based hypotheses.
 2. Footprint padding, inscribed radius and inflation follow a reading of Nav2 Jazzy
    source. Confirm them against the published footprint and costmap at runtime.
-3. The SDF was not checked with SDFormat/Gazebo tools (no `gz` command was run).
-   Its structure matches v1's generator, which v1 runs loaded.
+3. Resolved 2026-10-14: `gz sdf -k` (SDFormat 14 parser only) reports the world
+   Valid. Whether it loads and simulates correctly in Gazebo is still untested.
 4. The map = world frame identity is assumed; it must be confirmed at the start pose.
 5. The ground-truth model pose is assumed to coincide with `base_link` in the plane.
    The 7 cm AMCL agreement in v1 is consistent with this but does not prove it.
@@ -213,8 +213,8 @@ INCONCLUSIVE evidence, which counts for neither configuration. Proposed sequence
    recordings, but none of those entered an aisle.
 9. The assessment is a separate post-run script, not yet wired into campaign
    reports, so its output is not yet hash-bound in the report.
-10. The map is not installed in `artifacts/maps/` yet (§8 step 2), and the
-    registered launch choice has not been exercised by a real launch.
+10. The registered launch choice has not been exercised by a real launch, and no
+    ROS workspace containing the v2 world has been built yet (§8 step 2).
 
 ## 8. Steps before the first qualification
 
@@ -231,9 +231,23 @@ INCONCLUSIVE evidence, which counts for neither configuration. Proposed sequence
      hashes changed; the v1 pins did not, and the frozen matrix still rejects the
      new bytes. The v2 plan now pins both launch files and the map binding.
    The remaining steps each need approval.
-2. **Install the map.** Run `python scripts/warehouse_v2_scenario.py generate --output <new dir>`,
-   then copy the four `warehouse_v2.*` files into `artifacts/maps/` (new names
-   only). Rebuild `robot_simulation`; then run `gz sdf -k` on the installed world.
+2. **Install the map — done 2026-10-14 (owner approved), except the rebuild.**
+   - Generated with `python scripts/warehouse_v2_scenario.py generate --output <new dir>`
+     at `3309846`. As for v1, three files were copied without overwriting into the
+     main checkout's private `artifacts/maps/`:
+     - `warehouse_v2.yaml`: `f2674734…6ee1`
+     - `warehouse_v2.pgm`: `dd0032b5…dbda`
+     - `warehouse_v2.robotops.json`: binds descriptor `e51b33ea…`, world `b9f77cf1…`
+     These equal the plan's pins. Nothing else under `artifacts/` changed, and v1's
+     map still matches its frozen pins.
+   - The real orchestrator resolution accepts the installed map for `warehouse_v2`
+     and refuses it for any other world.
+   - `gz sdf -k` reports v2 and v1 Valid, and rejects a deliberately broken copy at
+     the faulty element.
+   - **Still to do:** build `robot_simulation` (and the bringup launch) in the
+     checkout that will run qualification, so its install contains the v2 world and
+     launch choice. The main checkout is on another branch, so this follows getting
+     v2 there (PR review/merge, or checking out this branch).
 3. **Run qualification.** Start the backend with `ROBOTOPS_CAMPAIGN_EXECUTION=1` and
    `ROBOTOPS_RECORDING_PROFILE=validation`, then submit `campaigns/Q01.json` and
    `Q02.json`.
@@ -242,7 +256,8 @@ INCONCLUSIVE evidence, which counts for neither configuration. Proposed sequence
 
 ## Recommendation
 
-With step 1 applied, v2 is ready for its first controlled simulation qualification
+With the world registered and its map installed, v2 is ready for its first
+controlled simulation qualification once a workspace containing it is built
 (steps 2–4, on approval). The design forces the aisle, the clearances are sufficient
 on paper, and the validator and reader work on real recorded evidence. The open
 risks are behavioural, and they are exactly what qualification is meant to test.
