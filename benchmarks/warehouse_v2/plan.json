@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "id": "warehouse_v2_narrow_aisle",
+  "status": "PLANNED_OFFLINE_ONLY",
+  "execution_approved": false,
+  "publication_approved": false,
+  "research_question": "Can NavFn + Regulated Pure Pursuit and Smac 2D + DWB reliably navigate a genuinely constrained warehouse aisle, and what performance trade-offs emerge?",
+  "comparison": "Configuration bundles (planner, controller and their parameters together), not individual algorithms. Profiles are used as reconstructed on 2026-10-13 and are not retuned for this benchmark.",
+  "historical_relation": "New identity. Does not reuse or rewrite the warehouse_v1 matrix, W01-W06, W3 or W4 evidence or pins.",
+  "scenario": {
+    "world_id": "warehouse_v2",
+    "map_id": "warehouse_v2",
+    "world_to_map": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "world_to_map_basis": "The analytic map is drawn in world coordinates; the robot spawns at the world origin and AMCL starts at map (0, 0, 0). To be confirmed at runtime by comparing AMCL with ground truth at the start pose.",
+    "ground_truth": {
+      "topic": "simulation/ground_truth",
+      "parent_frame": "warehouse_v2",
+      "child_frame": "robotops"
+    },
+    "descriptor": {
+      "path": "ros2_ws/src/robot_simulation/config/warehouse_v2.json",
+      "sha256": "e51b33ea6db1a2225a2d23e45835ceaad9a19f61ed3457478b9c44b712169bfc"
+    },
+    "world": {
+      "path": "ros2_ws/src/robot_simulation/worlds/warehouse_v2.sdf",
+      "sha256": "b9f77cf1bbab13788b6e567fe64ce42a28891928e827cbb277628f158d834716"
+    },
+    "generator": {
+      "path": "scripts/warehouse_v2_scenario.py",
+      "sha256": "349995852de9a9eeec466ae1740a1d34c505164beeaa6867c6ff2ad5a830e16e"
+    },
+    "map_yaml_sha256": "f26747341adcb8e6b23d01cf70352528ce4ea2c1827c469459b4404503e86ee1",
+    "map_image_sha256": "dd0032b5e5b462bc737435dd5e69d2708178b1c1802ef80d75d6c1d815e6dbda"
+  },
+  "mission": {
+    "frame": "map",
+    "start": {
+      "x": 0.0,
+      "y": 0.0,
+      "yaw": 0.0,
+      "position_tolerance": 0.35,
+      "yaw_tolerance": 0.4
+    },
+    "waypoints": [
+      {
+        "x": 3.0,
+        "y": 0.0,
+        "yaw": 1.5707963267948966
+      },
+      {
+        "x": 3.0,
+        "y": 7.0,
+        "yaw": -1.5707963267948966
+      },
+      {
+        "x": 3.0,
+        "y": 0.0,
+        "yaw": 3.141592653589793
+      },
+      {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      }
+    ],
+    "timeouts": {
+      "cancel": 30.0,
+      "response": 15.0,
+      "trial": 600.0
+    },
+    "recording_profile": "validation",
+    "recording_profile_basis": "Ground truth and AMCL pose are only recorded by the validation profile; start the backend with ROBOTOPS_RECORDING_PROFILE=validation.",
+    "final_pose_policy": {
+      "localization_max_age_s": 5.0,
+      "max_xy_variance_m2": 0.25,
+      "max_yaw_variance_rad2": 0.25,
+      "tf_max_age_s": 1.0,
+      "xy_tolerance_m": 0.2,
+      "yaw_tolerance_rad": 0.25
+    }
+  },
+  "aisle_requirement": {
+    "aisle": "aisle_1",
+    "corridor": {
+      "axis": "y",
+      "low": 1.5,
+      "high": 5.5,
+      "lateral": [
+        2.4,
+        3.6
+      ]
+    },
+    "start_zone": "low",
+    "required": [
+      "low_to_high",
+      "high_to_low"
+    ],
+    "require_ground_truth": true,
+    "policy": {
+      "gate_band_m": 0.15,
+      "max_gap_s": 0.25,
+      "max_speed_m_s": 0.5,
+      "jump_tolerance_m": 0.1,
+      "obstacle_tolerance_m": 0.1,
+      "coverage_tolerance_s": 0.5
+    }
+  },
+  "clearance_footprint_m": {
+    "x_min": -0.24,
+    "x_max": 0.16,
+    "y_min": -0.185,
+    "y_max": 0.185,
+    "basis": "Bounding rectangle of the URDF collision primitives (chassis offset rearward by 0.04 m; wheel outer faces at +/-0.185 m). Conservative: it over-approximates the round wheels and caster."
+  },
+  "measurements": [
+    {
+      "name": "ros_outcome",
+      "source": "mission action result (existing)",
+      "limit": "Navigation's own report; never sufficient alone."
+    },
+    {
+      "name": "final_pose",
+      "source": "existing localization final-pose validator",
+      "limit": "Localized, not physical, pose; 0.20 m / 0.25 rad."
+    },
+    {
+      "name": "aisle_traversal",
+      "source": "experiment_runner.aisle_traversal on localized TF and ground truth",
+      "limit": "Route only; INCONCLUSIVE when evidence is incomplete or sources disagree."
+    },
+    {
+      "name": "mission_time_s",
+      "source": "mission start/end in ROS time (existing)",
+      "limit": "Simulation time on one host."
+    },
+    {
+      "name": "aisle_transit_s",
+      "source": "gate-to-gate times per traversal",
+      "limit": "Excludes approach and turnaround."
+    },
+    {
+      "name": "path_length_m",
+      "source": "odometry path (existing) and ground-truth path",
+      "limit": "Odometry drifts; truth is simulator state."
+    },
+    {
+      "name": "aisle_lateral_offset_m",
+      "source": "max distance from the aisle centreline during traversal, per source",
+      "limit": "Centre point only; clearance is reported separately."
+    },
+    {
+      "name": "localization_error",
+      "source": "experiment_runner.ground_truth aligned errors, whole mission and inside the aisle",
+      "limit": "Requires ground truth; AMCL pose stream, not every TF sample."
+    },
+    {
+      "name": "contact",
+      "source": "existing Gazebo contact evidence",
+      "limit": "Monitored simulated bodies only; not a certification."
+    },
+    {
+      "name": "footprint_clearance_m",
+      "source": "experiment_runner.footprint_clearance on ground truth and analytic boxes",
+      "limit": "Simulation truth with a conservative rectangle; not measurable without ground truth."
+    },
+    {
+      "name": "aisle_entry_aborts",
+      "source": "aborted entries reported by the validator",
+      "limit": "Counts entries that turned back; not a cause."
+    }
+  ],
+  "reporting": "Per-trial values and counts (k of n); ranges, not significance tests. Navigation failures (ROS outcome, final pose or aisle requirement not met) are reported separately from INCONCLUSIVE or invalid evidence, which is never counted as a success or a failure of either configuration.",
+  "qualification": [
+    {
+      "id": "Q01",
+      "profile": "navfn_rpp",
+      "campaign": "benchmarks/warehouse_v2/campaigns/Q01.json"
+    },
+    {
+      "id": "Q02",
+      "profile": "smac_dwb",
+      "campaign": "benchmarks/warehouse_v2/campaigns/Q02.json"
+    }
+  ],
+  "benchmark_order_proposed": [
+    "navfn_rpp",
+    "smac_dwb",
+    "smac_dwb",
+    "navfn_rpp",
+    "navfn_rpp",
+    "smac_dwb",
+    "smac_dwb",
+    "navfn_rpp",
+    "navfn_rpp",
+    "smac_dwb"
+  ],
+  "not_pinned": {
+    "ros2_ws/src/robot_bringup/launch/robot.launch.py": "Gains the warehouse_v2 world choice at runtime registration, which is deliberately not part of this offline stage. Each trial's software.json binds the exact revision.",
+    "ros2_ws/src/robot_simulation/launch/gazebo.launch.py": "As above."
+  },
+  "profiles": {
+    "navfn_rpp": {
+      "source": {
+        "path": "ros2_ws/src/robot_navigation/config/profiles/navfn_rpp.yaml",
+        "sha256": "8263bc434e9fb719e6df65528eaca6c45797f6f3980e989c48601650580b92b5"
+      },
+      "composed_parameters_sha256": "aaa521b3c8981a3c3a60e60f562afa5ec696ae018f3ecc636748f1c34eef6f9e"
+    },
+    "smac_dwb": {
+      "source": {
+        "path": "ros2_ws/src/robot_navigation/config/profiles/smac_dwb.yaml",
+        "sha256": "7d2ba7b558d5431030f23d20c6f3464b76119247fb36209135068588f8fd3ce4"
+      },
+      "composed_parameters_sha256": "509b4a28a4a07b034dbeeffc8d3b2c546b980f990394315fafea66fde23869e6"
+    }
+  },
+  "shared": [
+    {
+      "path": "ros2_ws/src/robot_navigation/config/navigation.yaml",
+      "sha256": "f11ee69137c8a8f6a0ddf4feeb05737eb8d37cb3937a899e407814bd26147c96"
+    },
+    {
+      "path": "ros2_ws/src/robot_navigation/config/localization.yaml",
+      "sha256": "9e7ac1307c8173a735d1e69bd6763d6799af732dbcdc3650f0e268eb61a03a4d"
+    },
+    {
+      "path": "ros2_ws/src/robot_navigation/robot_navigation/navigation_config.py",
+      "sha256": "ed2b0de94b8bb554e7d2004d90d0048d5d8e2a6852f017c1ee864c51c5dd177a"
+    },
+    {
+      "path": "ros2_ws/src/robot_navigation/launch/navigation.launch.py",
+      "sha256": "f6e4d0c0e110be7256840511f48b11a2c5504c7971ef3b233b665ad418a997fc"
+    },
+    {
+      "path": "ros2_ws/src/robot_description/config/geometry.yaml",
+      "sha256": "bd180e8e4b84b30e11f38b452cd248e53c505eee9bbdce117b9441af7f9c997f"
+    },
+    {
+      "path": "ros2_ws/src/robot_description/urdf/base.xacro",
+      "sha256": "8d4304262871e65b2cf5a6eeabcbca22de2155bf69a20a43fd9071ddc46631e2"
+    },
+    {
+      "path": "ros2_ws/src/robot_control/config/controllers.yaml",
+      "sha256": "7ad9b4b972e8552ada36b4c6333dc666f0550c3d5839e0fb45c2feda36dbb9d5"
+    },
+    {
+      "path": "ros2_ws/src/robot_control/config/mux.yaml",
+      "sha256": "8efbdafa00147a03cf8121491edf9465a48378a6494640f4307a7c467ded8112"
+    },
+    {
+      "path": "ros2_ws/src/robot_control/config/guard.yaml",
+      "sha256": "9cf29a3a85220a4d5bed39f926697a1dadebdbef21f96200564ec1d61131cf47"
+    },
+    {
+      "path": "ros2_ws/src/robot_recorder/config/recording_validation.yaml",
+      "sha256": "b92533ca4d8888ef2aab4946eb309efb033ecbccc639f924292f3936d2572421"
+    },
+    {
+      "path": "ros2_ws/src/mission_manager/config/mission.yaml",
+      "sha256": "4cd1e5371feb1e89b3c25cf69add0667a372b6878e5591332c3677b1ab6a9be4"
+    },
+    {
+      "path": "ros2_ws/src/robot_simulation/config/bridge.yaml",
+      "sha256": "aa3b76cdde7b2a5404a31f0e7d9fd6b3a7c682313a17131979d7595659132943"
+    },
+    {
+      "path": "ros2_ws/src/robot_simulation/urdf/gazebo.urdf.xacro",
+      "sha256": "4e6ba80c36c4356d8d4e72d1b2554d62f58d5130afcf69bb3c34e6c0004aa3c1"
+    },
+    {
+      "path": "ros2_ws/src/robot_simulation/src/gazebo_runner.cpp",
+      "sha256": "710e925aa12db89a286f26baabc56096b18b548bfac792e37ac4e7ca0fa823bf"
+    },
+    {
+      "path": "ros2_ws/src/experiment_runner/experiment_runner/aisle_traversal.py",
+      "sha256": "dd57cd08e8cefbd5ad77b68035ff5185fcd22f98f6eeb0ced8e8f76ee650d920"
+    },
+    {
+      "path": "ros2_ws/src/experiment_runner/experiment_runner/footprint_clearance.py",
+      "sha256": "9bccb5d26da2d006a4053c5445f2ace17ce1ebdae57b20443774827c325c1671"
+    },
+    {
+      "path": "ros2_ws/src/experiment_runner/experiment_runner/ground_truth.py",
+      "sha256": "5b5146a467abde5632f8d1d6cc963ae2f24a3db8372fc4d0c44517e811bea5a6"
+    },
+    {
+      "path": "scripts/assess_warehouse_v2_trial.py",
+      "sha256": "63e7ed851c2024a7778541c2687b07d992744817daed2abf3466a9f023644fb2"
+    }
+  ]
+}
