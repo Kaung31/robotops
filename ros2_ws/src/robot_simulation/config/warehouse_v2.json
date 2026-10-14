@@ -1,0 +1,175 @@
+{
+  "schema_version": 2,
+  "world_id": "warehouse_v2",
+  "provenance": "Original RobotOps primitive geometry for the narrow-aisle benchmark design (2026-10-14). warehouse_v1's room, racks and aisle_1 are kept exactly; three closure blocks remove every alternative route between the south and north areas. No external models, textures or assets. Analytic occupancy is configuration-derived, not observed telemetry.",
+  "derived_from": {
+    "world_id": "warehouse_v1",
+    "descriptor_path": "ros2_ws/src/robot_simulation/config/warehouse_v1.json",
+    "descriptor_sha256": "78fe79f66bcc7d0bd7153f8b508561ebd26a9d097371575da3ba0d18b34ae2b6"
+  },
+  "physics": {
+    "max_step_size_s": 0.001,
+    "real_time_factor": 1.0
+  },
+  "map": {
+    "resolution_m": 0.05,
+    "origin_m": [
+      -2.1,
+      -1.6
+    ],
+    "width": 244,
+    "height": 204
+  },
+  "boxes": [
+    {
+      "name": "south_wall",
+      "centre_m": [
+        4.0,
+        -1.5,
+        0.6
+      ],
+      "size_m": [
+        12.2,
+        0.2,
+        1.2
+      ]
+    },
+    {
+      "name": "north_wall",
+      "centre_m": [
+        4.0,
+        8.5,
+        0.6
+      ],
+      "size_m": [
+        12.2,
+        0.2,
+        1.2
+      ]
+    },
+    {
+      "name": "west_wall",
+      "centre_m": [
+        -2.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        0.2,
+        10.0,
+        1.2
+      ]
+    },
+    {
+      "name": "east_wall",
+      "centre_m": [
+        10.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        0.2,
+        10.0,
+        1.2
+      ]
+    },
+    {
+      "name": "rack_1",
+      "centre_m": [
+        2.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        0.8,
+        4.0,
+        1.2
+      ]
+    },
+    {
+      "name": "rack_2",
+      "centre_m": [
+        4.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        0.8,
+        4.0,
+        1.2
+      ]
+    },
+    {
+      "name": "rack_3",
+      "centre_m": [
+        6.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        0.8,
+        4.0,
+        1.2
+      ]
+    },
+    {
+      "name": "closure_west",
+      "centre_m": [
+        -0.15,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        3.7,
+        4.0,
+        1.2
+      ]
+    },
+    {
+      "name": "closure_aisle_2",
+      "centre_m": [
+        5.0,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        1.4,
+        4.0,
+        1.2
+      ]
+    },
+    {
+      "name": "closure_east",
+      "centre_m": [
+        8.15,
+        3.5,
+        0.6
+      ],
+      "size_m": [
+        3.7,
+        4.0,
+        1.2
+      ]
+    }
+  ],
+  "aisle": {
+    "id": "aisle_1",
+    "axis": "y",
+    "between": [
+      "rack_1",
+      "rack_2"
+    ],
+    "corridor_m": {
+      "x": [
+        2.4,
+        3.6
+      ],
+      "y": [
+        1.5,
+        5.5
+      ]
+    },
+    "low_side": "south",
+    "high_side": "north"
+  }
+}
