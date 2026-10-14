@@ -31,7 +31,7 @@
     },
     "generator": {
       "path": "scripts/warehouse_v2_scenario.py",
-      "sha256": "349995852de9a9eeec466ae1740a1d34c505164beeaa6867c6ff2ad5a830e16e"
+      "sha256": "b461ade072b3cc84af27fb903523f921f4a92979b66cc6291e43f302d8787d0d"
     },
     "map_yaml_sha256": "f26747341adcb8e6b23d01cf70352528ce4ea2c1827c469459b4404503e86ee1",
     "map_image_sha256": "dd0032b5e5b462bc737435dd5e69d2708178b1c1802ef80d75d6c1d815e6dbda"
@@ -198,10 +198,7 @@
     "navfn_rpp",
     "smac_dwb"
   ],
-  "not_pinned": {
-    "ros2_ws/src/robot_bringup/launch/robot.launch.py": "Gains the warehouse_v2 world choice at runtime registration, which is deliberately not part of this offline stage. Each trial's software.json binds the exact revision.",
-    "ros2_ws/src/robot_simulation/launch/gazebo.launch.py": "As above."
-  },
+  "runtime_registration": "Owner-approved 2026-10-14: warehouse_v2 is a launch world choice and an orchestrator world that navigates only on its hash-bound analytic map. The backend orchestrator itself is not pinned; each trial's software.json binds the exact revision.",
   "profiles": {
     "navfn_rpp": {
       "source": {
@@ -272,8 +269,20 @@
       "sha256": "4e6ba80c36c4356d8d4e72d1b2554d62f58d5130afcf69bb3c34e6c0004aa3c1"
     },
     {
+      "path": "ros2_ws/src/robot_simulation/launch/gazebo.launch.py",
+      "sha256": "4f42584f4d262819baf1a1ab40b851d0021a166fe1b39bc75aa6506f9c479234"
+    },
+    {
       "path": "ros2_ws/src/robot_simulation/src/gazebo_runner.cpp",
       "sha256": "710e925aa12db89a286f26baabc56096b18b548bfac792e37ac4e7ca0fa823bf"
+    },
+    {
+      "path": "ros2_ws/src/robot_bringup/launch/robot.launch.py",
+      "sha256": "cba440996e3daa040bbdd2536d518eb99314afa3b8a0efa2af382145f98c5bee"
+    },
+    {
+      "path": "backend/robotops_backend/benchmarks/warehouse_v2.py",
+      "sha256": "72b0e190b3cee5d7193bd1f7e55d48019f6d087d5964048bc3198dc2e2a1fed5"
     },
     {
       "path": "ros2_ws/src/experiment_runner/experiment_runner/aisle_traversal.py",

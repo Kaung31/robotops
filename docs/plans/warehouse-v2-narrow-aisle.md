@@ -1,10 +1,10 @@
 # Warehouse v2: narrow-aisle navigation — offline design and feasibility
 
-Status: **offline design only** (2026-10-14). Nothing was launched: no Gazebo,
-Nav2, mission, backend or fault injection. Warehouse v1, W01–W06, W3, W4, their
-pins, evidence and `routing.guard` are unchanged; recorded evidence was only read.
-Q1 remains INCONCLUSIVE / RECOVERY UNKNOWN. Live qualification needs separate
-owner approval.
+Status: **offline design, registered for runtime selection** (2026-10-14). Nothing
+was launched: no Gazebo, Nav2, mission, backend or fault injection. Warehouse v1,
+W01–W06, W3, W4, their pins, evidence and `routing.guard` are unchanged; recorded
+evidence was only read. Q1 remains INCONCLUSIVE / RECOVERY UNKNOWN. Live
+qualification needs separate owner approval.
 
 Research question: can NavFn + Regulated Pure Pursuit and Smac 2D + DWB reliably
 navigate a genuinely constrained warehouse aisle, and what trade-offs emerge?
@@ -213,17 +213,24 @@ INCONCLUSIVE evidence, which counts for neither configuration. Proposed sequence
    recordings, but none of those entered an aisle.
 9. The assessment is a separate post-run script, not yet wired into campaign
    reports, so its output is not yet hash-bound in the report.
-10. Runtime registration and map installation are not done (§8).
+10. The map is not installed in `artifacts/maps/` yet (§8 step 2), and the
+    registered launch choice has not been exercised by a real launch.
 
-## 8. Steps before the first qualification (each needs approval)
+## 8. Steps before the first qualification
 
-1. **Register the world.** Add `warehouse_v2` to the world choices in
-   `robot_bringup/launch/robot.launch.py` and `robot_simulation/launch/gazebo.launch.py`,
-   and add a `WorldOption` and a `SIM_SPAWNS` (0, 0, 0) entry in
-   `backend/robotops_backend/orchestrator.py`. The two launch files are shared files
-   pinned by the frozen v1 matrix: their raw hashes would change, but the v1 pins
-   would not. The v2 plan lists them as `not_pinned`, and each trial's
-   `software.json` binds the exact revision.
+1. **Register the world — done 2026-10-14 (owner approved).**
+   - `warehouse_v2` is a world choice in `robot_bringup/launch/robot.launch.py` and
+     `robot_simulation/launch/gazebo.launch.py`.
+   - The orchestrator offers it as "Warehouse v2 forced aisle (unqualified)",
+     difficulty medium (one forced 1.2 m corridor; no clutter, sharp turns or dead
+     ends), and spawns the robot at (0, 0, 0).
+   - Like warehouse_v1, it navigates only on its analytic map, hash-bound to the v2
+     descriptor and world (`backend/robotops_backend/benchmarks/warehouse_v2.py`).
+     A SLAM map saved in the world is refused for navigation.
+   - Both launch files are shared files pinned by the frozen v1 matrix. Their raw
+     hashes changed; the v1 pins did not, and the frozen matrix still rejects the
+     new bytes. The v2 plan now pins both launch files and the map binding.
+   The remaining steps each need approval.
 2. **Install the map.** Run `python scripts/warehouse_v2_scenario.py generate --output <new dir>`,
    then copy the four `warehouse_v2.*` files into `artifacts/maps/` (new names
    only). Rebuild `robot_simulation`; then run `gz sdf -k` on the installed world.
@@ -235,7 +242,7 @@ INCONCLUSIVE evidence, which counts for neither configuration. Proposed sequence
 
 ## Recommendation
 
-v2 is ready for its first controlled simulation qualification once step 1 is
-approved and applied. The design forces the aisle, the clearances are sufficient on
-paper, and the validator and reader work on real recorded evidence. The open risks
-are behavioural, and they are exactly what qualification is meant to test.
+With step 1 applied, v2 is ready for its first controlled simulation qualification
+(steps 2–4, on approval). The design forces the aisle, the clearances are sufficient
+on paper, and the validator and reader work on real recorded evidence. The open
+risks are behavioural, and they are exactly what qualification is meant to test.

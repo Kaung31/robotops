@@ -1,7 +1,7 @@
 # Warehouse navigation benchmark v2 — narrow aisle (offline specification)
 
-Status: **PLANNED, offline only.** Not run, not approved for execution or
-publication. Design, findings and limits: [the plan](../../docs/plans/warehouse-v2-narrow-aisle.md).
+Status: **PLANNED.** Registered as a selectable world (2026-10-14); not run, not
+approved for execution or publication. Design, findings and limits: [the plan](../../docs/plans/warehouse-v2-narrow-aisle.md).
 
 Warehouse v1's room and 1.2 m `aisle_1`, with every alternative route between the
 south and north areas closed. A trial drives start → (3, 0) → (3, 7) → (3, 0) → home,

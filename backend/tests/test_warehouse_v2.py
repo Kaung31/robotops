@@ -1,10 +1,12 @@
 """Warehouse v2 (narrow aisle) offline contracts. No launch, ROS node or robot command."""
 
+import ast
 import copy
 import hashlib
 import importlib.util
 import json
 import math
+import shutil
 import sys
 from pathlib import Path
 
@@ -157,7 +159,67 @@ def test_plan_pins_the_current_checkout_as_a_new_identity():
     assert PLAN["execution_approved"] is False and PLAN["publication_approved"] is False
     v1_profiles = {p: V1_MATRIX["profiles"][p]["source"]["sha256"] for p in v2.PROFILES}
     assert all(PLAN["profiles"][p]["source"]["sha256"] != v1_profiles[p] for p in v2.PROFILES)
-    assert set(PLAN["not_pinned"]).isdisjoint(p["path"] for p in PLAN["shared"])
+    pinned = {p["path"] for p in PLAN["shared"]}
+    assert set(LAUNCH_FILES) | {"backend/robotops_backend/benchmarks/warehouse_v2.py"} <= pinned
+
+
+LAUNCH_FILES = (
+    "ros2_ws/src/robot_bringup/launch/robot.launch.py",
+    "ros2_ws/src/robot_simulation/launch/gazebo.launch.py",
+)
+
+
+def test_registration_offers_warehouse_v2_with_the_plan_start_as_spawn():
+    from robotops_backend.orchestrator import StackOrchestrator
+
+    worlds = {w.id: w for w in StackOrchestrator.WORLDS}
+    assert worlds["warehouse_v2"].difficulty == "medium"
+    assert "warehouse_v1" in worlds
+    start = PLAN["mission"]["start"]
+    assert StackOrchestrator.SIM_SPAWNS["warehouse_v2"] == (start["x"], start["y"], start["yaw"])
+    for relative in LAUNCH_FILES:
+        tree = ast.parse((ROOT / relative).read_text())
+        choices = [
+            ast.literal_eval(k.value)
+            for n in ast.walk(tree)
+            if isinstance(n, ast.Call)
+            for k in n.keywords
+            if k.arg == "choices" and isinstance(k.value, ast.List)
+        ]
+        assert any({"warehouse_v1", "warehouse_v2"} <= set(c) for c in choices)
+
+
+def analytic_workspace(root: Path) -> Path:
+    for path in (v2.DESCRIPTOR, v2.WORLD):
+        target = root / path.relative_to(ROOT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
+    v2.generate(v2.DESCRIPTOR, root / "artifacts/maps")
+    return root
+
+
+def test_warehouse_v2_navigates_only_on_its_hash_bound_analytic_map(tmp_path):
+    from robotops_backend.orchestrator import StackOrchestrator
+
+    workspace = analytic_workspace(tmp_path)  # conftest points the repo root here.
+    o = StackOrchestrator(workspace)
+    assert o._resolve_map("warehouse_v2", "warehouse_v2").is_file()
+    with pytest.raises(ValueError, match="belongs to world"):
+        o._resolve_map("warehouse_v2", "warehouse_v1")
+    meta_path = workspace / "artifacts/maps/warehouse_v2.robotops.json"
+    original = meta_path.read_bytes()
+    # A map saved by SLAM in this world is associated with it, but not analytic.
+    meta_path.write_text(json.dumps(dict(json.loads(original), map_source="SLAM_TOOLBOX")))
+    with pytest.raises(ValueError, match="analytic map"):
+        o._resolve_map("warehouse_v2", "warehouse_v2")
+    meta_path.write_bytes(original)
+    world = workspace / v2.WORLD.relative_to(ROOT)
+    world.write_bytes(world.read_bytes() + b"<!-- edited -->\n")
+    with pytest.raises(ValueError, match="hash mismatch: world_sha256"):
+        o._resolve_map("warehouse_v2", "warehouse_v2")
+    meta_path.unlink()
+    with pytest.raises(ValueError, match="explicit"):
+        o._resolve_map("warehouse_v2", "warehouse_v2")
 
 
 def test_requirement_matches_the_descriptor_aisle(descriptor):

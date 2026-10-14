@@ -29,6 +29,19 @@ SPEC = importlib.util.spec_from_file_location(
 scenario = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(scenario)
 DESCRIPTOR = ROOT / "ros2_ws/src/robot_simulation/config/warehouse_v1.json"
+# Navigation YAML reconstructed offline on 2026-10-13 (same effective values).
+RECONSTRUCTED = {
+    "ros2_ws/src/robot_navigation/config/navigation.yaml",
+    "ros2_ws/src/robot_navigation/config/localization.yaml",
+    "ros2_ws/src/robot_navigation/config/profiles/navfn_rpp.yaml",
+    "ros2_ws/src/robot_navigation/config/profiles/smac_dwb.yaml",
+}
+# Launch files that gained the warehouse_v2 world choice (owner-approved 2026-10-14);
+# warehouse_v1 launch behaviour is unchanged.
+REGISTERED = {
+    "ros2_ws/src/robot_bringup/launch/robot.launch.py",
+    "ros2_ws/src/robot_simulation/launch/gazebo.launch.py",
+}
 
 
 @pytest.fixture
@@ -58,16 +71,10 @@ def workspace(tmp_path):
             source = generated / target.name
         shutil.copyfile(source, target)
     # Current-source fixtures are new specifications, not the historical matrix.
-    # Rebind only reconstructed YAML byte pins, retaining frozen effective hashes.
+    # Rebind only the known post-benchmark byte changes, retaining frozen effective hashes.
     current = matrix.model_dump(mode="json")
-    reconstructed = {
-        "ros2_ws/src/robot_navigation/config/navigation.yaml",
-        "ros2_ws/src/robot_navigation/config/localization.yaml",
-        "ros2_ws/src/robot_navigation/config/profiles/navfn_rpp.yaml",
-        "ros2_ws/src/robot_navigation/config/profiles/smac_dwb.yaml",
-    }
     for pin in [*current["shared"], *[p["source"] for p in current["profiles"].values()]]:
-        if pin["path"] in reconstructed:
+        if pin["path"] in RECONSTRUCTED | REGISTERED:
             pin["sha256"] = digest((tmp_path / pin["path"]).read_bytes())
     write_matrix(tmp_path, current)
     return tmp_path
@@ -504,7 +511,8 @@ def test_no_ros_or_operational_imports_in_offline_tools():
             for k in n.keywords
             if k.arg == "choices" and isinstance(k.value, ast.List)
         ]
-        assert ["control_pad", "mapping_lab", "warehouse_v1"] in [
+        # warehouse_v2 was registered with owner approval (2026-10-14).
+        assert ["control_pad", "mapping_lab", "warehouse_v1", "warehouse_v2"] in [
             ast.literal_eval(v) for v in choices
         ]
 
@@ -644,12 +652,7 @@ def test_frozen_matrix_rejects_reconstructed_byte_identities(workspace):
         except ValueError as error:
             assert "Hash mismatch:" in str(error)
             mismatches.append(pin.path)
-    assert set(mismatches) == {
-        "ros2_ws/src/robot_navigation/config/navigation.yaml",
-        "ros2_ws/src/robot_navigation/config/localization.yaml",
-        "ros2_ws/src/robot_navigation/config/profiles/navfn_rpp.yaml",
-        "ros2_ws/src/robot_navigation/config/profiles/smac_dwb.yaml",
-    }
+    assert set(mismatches) == RECONSTRUCTED | REGISTERED
     path = write_matrix(workspace, historical.model_dump(mode="json"))
     assert path.read_bytes() == MATRIX.read_bytes()
     with pytest.raises(ValueError, match="Hash mismatch:.*navigation.yaml"):

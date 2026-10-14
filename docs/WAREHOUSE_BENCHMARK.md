@@ -113,7 +113,9 @@ and original evidence. The current navigation YAML was reconstructed offline:
 its effective parameter values are unchanged, but its raw bytes/hashes differ.
 It **cannot be substituted into the original frozen matrix**. Strict validation
 of that matrix against the current checkout correctly fails; do not rewrite its
-pins or bypass validation to make it pass.
+pins or bypass validation to make it pass. Since 2026-10-14 the two pinned launch
+files also differ: they gained the `warehouse_v2` world choice (see
+[the v2 plan](plans/warehouse-v2-narrow-aisle.md)); warehouse_v1 launches as before.
 
 Historical inspection/reproduction requires the matching original configuration
 bytes and preserved private map/evidence inputs. Git history retains the old YAML;

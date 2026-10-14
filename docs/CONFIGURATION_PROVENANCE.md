@@ -119,7 +119,11 @@ revision and preserved evidence. A future new benchmark specification needs a
 separately reviewed identity; this change grants no run authority.
 
 Ordinary tests create temporary current-source matrix fixtures, updating only the
-four affected raw YAML pins in those temporary copies. Effective-parameter pins,
+four affected raw YAML pins in those temporary copies. Since 2026-10-14 the same
+applies to `robot_bringup/launch/robot.launch.py` and
+`robot_simulation/launch/gazebo.launch.py`, which gained the owner-approved
+`warehouse_v2` world choice; warehouse_v1 launch behaviour is unchanged and the
+frozen matrix still rejects their new bytes. Effective-parameter pins,
 all other source pins and the production validator remain strict. A separate test
 checks rejection of the frozen matrix against reconstructed bytes. The normal
 campaign service does not call that historical matrix validator and continues to
