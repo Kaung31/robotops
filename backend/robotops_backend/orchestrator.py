@@ -31,6 +31,7 @@ _MAP_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
 # ROS launch reports every child exit; a death or lost X display is not a clean stop.
 _CHILD_DIED = re.compile(r"\[ERROR\] \[([^\]]+)\]: process has died \[pid \d+, exit code (-?\d+)")
 _RECORDING_PROFILES = ("standard", "validation")
+_ANALYTIC_MAP_WORLDS = ("warehouse_v1", "warehouse_v2")
 
 
 @dataclass
@@ -54,11 +55,17 @@ class StackOrchestrator:
         WorldOption(id="control_pad", label="Control Pad", difficulty="easy"),
         WorldOption(id="mapping_lab", label="Mapping Lab", difficulty="medium"),
         WorldOption(id="warehouse_v1", label="Warehouse v1 (unqualified)", difficulty="medium"),
+        # One forced 1.2 m corridor, no clutter, sharp turns or dead ends: medium.
+        # See docs/plans/warehouse-v2-narrow-aisle.md.
+        WorldOption(
+            id="warehouse_v2", label="Warehouse v2 forced aisle (unqualified)", difficulty="medium"
+        ),
     )
     SIM_SPAWNS = {
         "control_pad": (0.0, 0.0, 0.0),
         "mapping_lab": (0.0, 0.0, 0.0),
         "warehouse_v1": (0.0, 0.0, 0.0),
+        "warehouse_v2": (0.0, 0.0, 0.0),
     }
     NAVIGATION_PROFILES = (
         NavigationProfile(
@@ -905,10 +912,16 @@ class StackOrchestrator:
                 f"Saved map '{map_id}' belongs to world '{artifact.world_id}', not '{world_id}'"
             )
         path = (self.repo_root / artifact.yaml_path).resolve(strict=True)
-        if world_id == "warehouse_v1" or artifact.world_id == "warehouse_v1":
+        # Benchmark worlds navigate only on their hash-bound analytic map.
+        analytic = world_id if world_id in _ANALYTIC_MAP_WORLDS else artifact.world_id
+        if analytic in _ANALYTIC_MAP_WORLDS:
             from .benchmarks.warehouse import validate_warehouse_map
+            from .benchmarks.warehouse_v2 import validate_warehouse_v2_map
 
-            if artifact.world_id != "warehouse_v1":
+            if artifact.world_id != analytic:
                 raise ValueError("Warehouse requires explicit map/world association")
-            validate_warehouse_map(self.repo_root, path)
+            if analytic == "warehouse_v1":
+                validate_warehouse_map(self.repo_root, path)
+            else:
+                validate_warehouse_v2_map(self.repo_root, path)
         return path

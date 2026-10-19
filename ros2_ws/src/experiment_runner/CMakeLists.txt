@@ -11,6 +11,9 @@ if(BUILD_TESTING)
   ament_add_pytest_test(experiment_validation test/test_validation.py)
   ament_add_pytest_test(experiment_contacts test/test_contacts.py)
   ament_add_pytest_test(experiment_ground_truth test/test_ground_truth.py)
+  ament_add_pytest_test(experiment_aisle_traversal test/test_aisle_traversal.py)
+  ament_add_pytest_test(experiment_footprint_clearance
+                        test/test_footprint_clearance.py)
   ament_add_pytest_test(experiment_integration test/experiment_integration.py
                         TIMEOUT 180 ENV ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST)
   option(ROBOTOPS_EXPERIMENT_SIM_TESTS

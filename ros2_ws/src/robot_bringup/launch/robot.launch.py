@@ -151,7 +151,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "world",
                 default_value="control_pad",
-                choices=["control_pad", "mapping_lab", "warehouse_v1"],
+                choices=["control_pad", "mapping_lab", "warehouse_v1", "warehouse_v2"],
             ),
             DeclareLaunchArgument("sensors", default_value="true", choices=["true", "false"]),
             DeclareLaunchArgument(
